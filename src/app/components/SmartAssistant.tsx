@@ -121,7 +121,7 @@ export function SmartAssistant({ items, onOpenCategory, onOpenAR }: SmartAssista
   const tone = TONE_STYLES[visibleSuggestion.tone];
 
   return (
-    <div className="pointer-events-none fixed bottom-4 left-4 right-4 z-40 md:left-auto md:right-6 md:w-[22rem]">
+    <div className="pointer-events-none fixed inset-x-3 bottom-3 z-40 sm:inset-x-4 sm:bottom-4 md:left-auto md:right-6 md:w-[min(22rem,calc(100vw-2rem))]">
       <AnimatePresence mode="wait">
         <motion.div
           key={visibleSuggestion.id}

@@ -143,7 +143,7 @@ function ComponentCard({
       className="rounded-[24px] border border-white/10 bg-black/20 p-4 text-left transition hover:-translate-y-0.5 hover:border-white/20"
       style={{ boxShadow: `0 18px 40px ${item.shadow}` }}
     >
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div
           className="flex h-11 w-11 items-center justify-center rounded-2xl border"
           style={{
@@ -237,7 +237,7 @@ function LibraryMenuContent({
         <button
           type="button"
           onClick={onOpenCommand}
-          className="mt-4 flex w-full items-center justify-between rounded-[20px] border border-white/10 bg-white/[0.04] px-4 py-3 text-left transition hover:bg-white/[0.07]"
+          className="mt-4 flex w-full flex-wrap items-center justify-between gap-3 rounded-[20px] border border-white/10 bg-white/[0.04] px-4 py-3 text-left transition hover:bg-white/[0.07]"
         >
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-violet-500/16 text-violet-200">
@@ -450,7 +450,7 @@ function InspectorPanel({
           />
         </label>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid gap-3 sm:grid-cols-2">
           <label className="block">
             <span className="mb-2 block text-sm font-medium text-white/65">Width</span>
             <input
@@ -542,7 +542,7 @@ function InspectorPanel({
                 />
               </label>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-3 sm:grid-cols-2">
                 <label className="block">
                   <span className="mb-2 block text-sm font-medium text-white/65">X</span>
                   <input
@@ -563,7 +563,7 @@ function InspectorPanel({
                 </label>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid gap-3 sm:grid-cols-3">
                 <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-3">
                   <p className="text-[10px] uppercase tracking-[0.16em] text-white/45">Footprint</p>
                   <p className="mt-2 text-sm font-semibold text-white">
@@ -582,7 +582,7 @@ function InspectorPanel({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-3 sm:grid-cols-2">
                 <button
                   type="button"
                   onClick={() => rotateSelected(-90)}
@@ -887,9 +887,9 @@ export function Builder() {
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.2),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(236,72,153,0.12),transparent_22%),linear-gradient(180deg,#04050b_0%,#090910_100%)] text-white">
       <header className="sticky top-0 z-30 border-b border-white/10 bg-black/30 backdrop-blur-2xl">
-        <div className="mx-auto flex max-w-[1600px] flex-col gap-4 px-4 py-4 lg:px-6">
+      <div className="mx-auto flex w-full max-w-[var(--content-max-width)] flex-col gap-4 px-[var(--page-gutter)] py-4">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex min-w-0 flex-wrap items-center gap-3">
               <Link
                 to="/"
                 className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/75 transition hover:bg-white/[0.08] hover:text-white"
@@ -897,10 +897,10 @@ export function Builder() {
                 <ArrowLeft className="h-4 w-4" />
                 Back
               </Link>
-              <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2.5">
+              <div className="min-w-0 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2.5">
                 <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">Active project</p>
                 <div className="mt-1 flex flex-wrap items-center gap-3">
-                  <span className="text-base font-semibold">{booth.name}</span>
+                  <span className="min-w-0 text-base font-semibold">{booth.name}</span>
                   <span className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-white/55">
                     {booth.templateId}
                   </span>
@@ -915,11 +915,11 @@ export function Builder() {
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="grid gap-3 sm:flex sm:flex-wrap sm:items-center">
               <button
                 type="button"
                 onClick={() => (isMobile ? setComponentMenuOpen(true) : setComponentMenuOpen((current) => !current))}
-                className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/75 transition hover:bg-white/[0.08] hover:text-white"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/75 transition hover:bg-white/[0.08] hover:text-white"
               >
                 {componentMenuOpen && !isMobile ? (
                   <PanelLeftClose className="h-4 w-4" />
@@ -936,7 +936,7 @@ export function Builder() {
                     setComponentMenuOpen(true);
                   }
                 }}
-                className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/75 transition hover:bg-white/[0.08] hover:text-white"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/75 transition hover:bg-white/[0.08] hover:text-white"
               >
                 <Search className="h-4 w-4" />
                 Quick Add
@@ -948,7 +948,7 @@ export function Builder() {
                 type="button"
                 onClick={() => setShowGrid((current) => !current)}
                 className={cn(
-                  "inline-flex items-center gap-2 rounded-2xl border px-4 py-2 text-sm font-medium transition",
+                  "inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border px-4 py-2 text-sm font-medium transition",
                   showGrid
                     ? "border-violet-400/30 bg-violet-500/14 text-violet-200"
                     : "border-white/10 bg-white/[0.04] text-white/65 hover:text-white",
@@ -967,14 +967,14 @@ export function Builder() {
                     }),
                   )
                 }
-                className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/75 transition hover:bg-white/[0.08] hover:text-white"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/75 transition hover:bg-white/[0.08] hover:text-white"
               >
                 {booth.ambience === "day" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                 {booth.ambience === "day" ? "Day Scene" : "Night Scene"}
               </button>
               <Link
                 to="/ai"
-                className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/75 transition hover:bg-white/[0.08] hover:text-white"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/75 transition hover:bg-white/[0.08] hover:text-white"
               >
                 <Sparkles className="h-4 w-4" />
                 AI Studio
@@ -989,7 +989,7 @@ export function Builder() {
                     sourceLabel: booth.name,
                   })
                 }
-                className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-gradient-to-r from-violet-500 to-indigo-500 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_0_24px_rgba(99,102,241,0.35)] transition hover:brightness-110"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-gradient-to-r from-violet-500 to-indigo-500 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_0_24px_rgba(99,102,241,0.35)] transition hover:brightness-110"
               >
                 <Eye className="h-4 w-4" />
                 Enter AR
@@ -997,7 +997,7 @@ export function Builder() {
             </div>
           </div>
 
-          <div className="grid gap-3 md:grid-cols-4">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
               <p className="text-[11px] uppercase tracking-[0.22em] text-white/45">Footprint</p>
               <p className="mt-2 text-xl font-semibold">
@@ -1021,12 +1021,12 @@ export function Builder() {
         </div>
       </header>
 
-      <div className="mx-auto grid max-w-[1600px] gap-4 px-4 py-4 pb-24 lg:px-6 xl:grid-cols-[minmax(0,1fr),320px] xl:pb-4">
+      <div className="mx-auto grid w-full max-w-[var(--content-max-width)] gap-4 px-[var(--page-gutter)] py-4 pb-24 xl:grid-cols-[minmax(0,1fr),minmax(18rem,20rem)] xl:pb-4">
         <div
           className={cn(
             "relative min-w-0 transition-[padding] duration-300",
-            "xl:pl-[88px]",
-            componentMenuOpen && "xl:pl-[336px]",
+            "xl:pl-[5.5rem]",
+            componentMenuOpen && "xl:pl-[21rem]",
           )}
         >
           <DesktopCommandRail

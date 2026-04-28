@@ -42,6 +42,10 @@ export function ARPreview({ isOpen, onClose, templateId, project }: ARPreviewPro
         )
       : "");
   const metrics = useMemo(() => deriveMetrics(booth, items), [booth, items]);
+  const previewScale = useMemo(() => {
+    const largestDimension = Math.max(booth.width * CELL_SIZE, booth.depth * CELL_SIZE, 1);
+    return Math.max(0.18, Math.min(0.42, 260 / largestDimension));
+  }, [booth.depth, booth.width]);
   const launcherRef = useRef<HTMLDivElement | null>(null);
   const launcherCleanupRef = useRef<null | (() => void)>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -196,19 +200,19 @@ export function ARPreview({ isOpen, onClose, templateId, project }: ARPreviewPro
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-xl"
+        className="fixed inset-0 z-50 flex items-start justify-center bg-black/75 p-3 backdrop-blur-xl sm:items-center sm:p-4 lg:p-6"
       >
         <motion.div
           initial={{ opacity: 0, y: 18, scale: 0.97 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 18, scale: 0.97 }}
           transition={{ duration: 0.28 }}
-          className="relative flex max-h-[95vh] w-full max-w-7xl flex-col overflow-hidden rounded-[36px] border border-white/10 bg-[linear-gradient(180deg,rgba(11,11,18,0.94),rgba(5,5,10,0.97))] shadow-[0_35px_100px_rgba(0,0,0,0.5)]"
+          className="relative flex max-h-[100svh] w-full max-w-[var(--content-max-width)] flex-col overflow-hidden rounded-[1.75rem] border border-white/10 bg-[linear-gradient(180deg,rgba(11,11,18,0.94),rgba(5,5,10,0.97))] shadow-[0_35px_100px_rgba(0,0,0,0.5)] sm:max-h-[95vh] sm:rounded-[2.25rem]"
         >
-          <div className="flex items-start justify-between gap-4 border-b border-white/10 px-5 py-5 md:px-7">
+          <div className="flex flex-col gap-4 border-b border-white/10 px-4 py-4 sm:flex-row sm:items-start sm:justify-between sm:px-5 md:px-7">
             <div>
               <p className="text-[11px] uppercase tracking-[0.28em] text-white/45">AR Rehearsal</p>
-              <h2 className="mt-2 text-2xl font-semibold text-white md:text-3xl">
+              <h2 className="mt-2 text-[clamp(1.4rem,3vw,2rem)] font-semibold text-white">
                 Validate {project?.sourceLabel || booth.name} before you ship
               </h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-white/55">
@@ -224,8 +228,8 @@ export function ARPreview({ isOpen, onClose, templateId, project }: ARPreviewPro
             </button>
           </div>
 
-          <div className="overflow-auto px-5 py-5 md:px-7">
-            <div className="grid gap-4 xl:grid-cols-[1.15fr,0.85fr]">
+          <div className="overflow-auto px-4 py-4 sm:px-5 sm:py-5 md:px-7">
+            <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr),minmax(18rem,0.85fr)]">
               <section className="rounded-[28px] border border-white/10 bg-white/[0.04] p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
@@ -318,13 +322,18 @@ export function ARPreview({ isOpen, onClose, templateId, project }: ARPreviewPro
                 <div className="relative mt-4 overflow-hidden rounded-[24px] border border-white/10 bg-black/30">
                   {cameraActive ? (
                     <>
-                      <video ref={videoRef} className="h-[360px] w-full object-cover" muted playsInline />
+                      <video
+                        ref={videoRef}
+                        className="aspect-[16/10] min-h-[16rem] w-full object-cover sm:min-h-[20rem]"
+                        muted
+                        playsInline
+                      />
                       <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-gradient-to-b from-transparent via-transparent to-black/35">
                         <div
                           className="relative border border-violet-300/35 bg-violet-500/8 shadow-[0_35px_80px_rgba(0,0,0,0.3)]"
                           style={{
-                            width: booth.width * (CELL_SIZE * 0.42),
-                            height: booth.depth * (CELL_SIZE * 0.42),
+                            width: booth.width * (CELL_SIZE * previewScale),
+                            height: booth.depth * (CELL_SIZE * previewScale),
                             transform: "perspective(960px) rotateX(70deg)",
                             transformStyle: "preserve-3d",
                             backgroundImage:
@@ -341,10 +350,10 @@ export function ARPreview({ isOpen, onClose, templateId, project }: ARPreviewPro
                                 key={item.id}
                                 className="absolute flex items-center justify-center rounded-xl border text-[9px] font-semibold uppercase tracking-[0.12em] text-white/90"
                                 style={{
-                                  left: item.x * CELL_SIZE * 0.42,
-                                  top: item.y * CELL_SIZE * 0.42,
-                                  width: footprint.width * CELL_SIZE * 0.42,
-                                  height: footprint.depth * CELL_SIZE * 0.42,
+                                  left: item.x * CELL_SIZE * previewScale,
+                                  top: item.y * CELL_SIZE * previewScale,
+                                  width: footprint.width * CELL_SIZE * previewScale,
+                                  height: footprint.depth * CELL_SIZE * previewScale,
                                   borderColor: config.accent,
                                   background: config.background,
                                   boxShadow: `0 10px 28px ${config.shadow}`,
@@ -358,7 +367,7 @@ export function ARPreview({ isOpen, onClose, templateId, project }: ARPreviewPro
                       </div>
                     </>
                   ) : (
-                    <div className="flex h-[360px] flex-col items-center justify-center gap-4 p-8 text-center text-white/50">
+                    <div className="flex aspect-[16/10] min-h-[16rem] flex-col items-center justify-center gap-4 p-6 text-center text-white/50 sm:min-h-[20rem] sm:p-8">
                       <div className="flex h-20 w-20 items-center justify-center rounded-[26px] border border-dashed border-white/15 bg-white/[0.03]">
                         <Camera className="h-7 w-7" />
                       </div>
@@ -398,7 +407,7 @@ export function ARPreview({ isOpen, onClose, templateId, project }: ARPreviewPro
                 </p>
                 <div
                   ref={launcherRef}
-                  className="mt-4 flex min-h-[220px] items-center justify-center rounded-[24px] border border-dashed border-white/15 bg-black/20 p-6"
+                  className="mt-4 flex min-h-[13rem] items-center justify-center rounded-[24px] border border-dashed border-white/15 bg-black/20 p-6 sm:min-h-[15rem]"
                 >
                   {!showArLauncher ? (
                     <button

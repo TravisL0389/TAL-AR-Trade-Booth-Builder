@@ -2,6 +2,9 @@
 
 :root {
   --font-size: 16px;
+  --page-gutter: clamp(1rem, 2.4vw, 2rem);
+  --section-gap: clamp(1rem, 2.4vw, 1.75rem);
+  --content-max-width: 112rem;
   --background: #090910;
   --foreground: #f8f7ff;
   --card: #10111a;
@@ -128,6 +131,8 @@
     @apply bg-background text-foreground;
     font-family: "Avenir Next", "Segoe UI Variable", "SF Pro Display", sans-serif;
     min-height: 100vh;
+    margin: 0;
+    overflow-x: hidden;
     background-image:
       radial-gradient(circle at top, rgba(99, 102, 241, 0.18), transparent 28%),
       radial-gradient(circle at bottom right, rgba(236, 72, 153, 0.1), transparent 22%),
@@ -145,6 +150,44 @@
 
   html {
     font-size: var(--font-size);
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+  }
+
+  body,
+  #root {
+    width: 100%;
+  }
+
+  #root {
+    min-height: 100vh;
+    isolation: isolate;
+  }
+
+  img,
+  picture,
+  video,
+  canvas,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  img,
+  picture,
+  video {
+    height: auto;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  textarea {
+    field-sizing: content;
   }
 
   h1 {
@@ -187,5 +230,41 @@
     font-size: var(--text-base);
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --font-size: 15px;
+    --page-gutter: 1rem;
+    --section-gap: 1rem;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  :root {
+    --font-size: 15.5px;
+    --page-gutter: 1.125rem;
+    --section-gap: 1.125rem;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  :root {
+    --font-size: 16px;
+    --page-gutter: 1.25rem;
+    --section-gap: 1.25rem;
+  }
+}
+
+@media (min-width: 1025px) {
+  :root {
+    --font-size: 16px;
+  }
+}
+
+@media (min-width: 1600px) {
+  :root {
+    --font-size: 17px;
   }
 }

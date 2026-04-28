@@ -244,7 +244,7 @@ function BoothPreview3D({ boothState, isGenerating }: { boothState: BoothTheme; 
   const c = colors[boothState];
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center">
+    <div className="relative flex h-full w-full items-center justify-center overflow-hidden px-2 py-4 sm:px-4">
 
       {/* Scanning overlay when generating */}
       <AnimatePresence>
@@ -280,7 +280,10 @@ function BoothPreview3D({ boothState, isGenerating }: { boothState: BoothTheme; 
       </AnimatePresence>
 
       {/* The 3D Scene */}
-      <div className="relative" style={{ width: 560, height: 380, perspective: "1200px" }}>
+      <div
+        className="relative h-[380px] w-[560px] shrink-0 origin-center scale-[0.56] sm:scale-[0.72] lg:scale-[0.86] xl:scale-100"
+        style={{ perspective: "1200px" }}
+      >
 
         {/* Floor platform */}
         <motion.div
@@ -841,7 +844,7 @@ export function AIGenerator() {
   ];
 
   return (
-    <div className="h-screen w-full text-white flex flex-col overflow-hidden selection:bg-purple-500/30"
+    <div className="flex min-h-[100svh] w-full flex-col overflow-hidden text-white selection:bg-purple-500/30"
       style={{ background: "radial-gradient(ellipse at 20% 50%, rgba(99,102,241,0.06) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(168,85,247,0.06) 0%, transparent 60%), #050508" }}>
 
       {/* ── Ambient Orbs ── */}
@@ -853,7 +856,7 @@ export function AIGenerator() {
       </div>
 
       {/* ── Top Bar ── */}
-      <header className="relative z-50 flex items-center justify-between px-6 pt-5 pb-4 shrink-0">
+      <header className="relative z-50 mx-auto flex w-full max-w-[var(--content-max-width)] shrink-0 flex-col gap-3 px-[var(--page-gutter)] pt-4 pb-4 lg:flex-row lg:items-center lg:justify-between lg:pt-5">
 
         {/* Back */}
         <motion.button
@@ -867,13 +870,13 @@ export function AIGenerator() {
         </motion.button>
 
         {/* Mode Toggle */}
-        <div className="flex items-center p-1.5 rounded-2xl border border-white/10 backdrop-blur-3xl"
+        <div className="flex w-full flex-wrap items-center gap-1.5 rounded-2xl border border-white/10 p-1.5 backdrop-blur-3xl sm:w-auto"
           style={{ background: "rgba(255,255,255,0.03)" }}>
           {MODES.map(mode => (
             <button
               key={mode.id}
               onClick={() => setActiveMode(mode.id)}
-              className={`relative flex items-center gap-2 px-5 py-2 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all duration-300 ${
+              className={`relative flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-[11px] font-bold uppercase tracking-wider transition-all duration-300 sm:flex-none sm:px-5 ${
                 activeMode === mode.id ? "text-white" : "text-white/35 hover:text-white/70 hover:bg-white/4"
               }`}
             >
@@ -897,7 +900,7 @@ export function AIGenerator() {
         <motion.button
           whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
           onClick={openAR}
-          className="flex items-center gap-2 px-5 py-2 rounded-2xl border border-white/15 text-[12px] font-bold tracking-widest uppercase transition-all backdrop-blur-xl"
+          className="flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-white/15 px-5 py-2 text-[12px] font-bold uppercase tracking-widest transition-all backdrop-blur-xl sm:w-auto"
           style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.2), rgba(168,85,247,0.15))", color: "rgba(255,255,255,0.85)" }}
         >
           <Eye className="w-3.5 h-3.5" />
@@ -906,14 +909,14 @@ export function AIGenerator() {
       </header>
 
       {/* ── Main Content ── */}
-      <main className="relative z-10 flex-1 flex gap-5 px-6 pb-6 overflow-hidden min-h-0">
+      <main className="relative z-10 mx-auto flex w-full max-w-[var(--content-max-width)] flex-1 flex-col gap-4 overflow-auto px-[var(--page-gutter)] pb-4 min-h-0 sm:pb-6 lg:flex-row lg:gap-5 lg:overflow-hidden">
 
         {/* ── LEFT PANEL ── */}
         <motion.div
           initial={{ x: -40, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="w-[400px] shrink-0 flex flex-col rounded-[28px] border border-white/10 overflow-hidden"
+          className="flex min-h-[28rem] w-full shrink-0 flex-col overflow-hidden rounded-[28px] border border-white/10 lg:min-h-0 lg:max-w-[26rem] xl:max-w-[28rem]"
           style={{ background: "rgba(255,255,255,0.02)", backdropFilter: "blur(40px)", boxShadow: "0 40px 100px rgba(0,0,0,0.5)" }}
         >
 
@@ -1094,7 +1097,7 @@ export function AIGenerator() {
           initial={{ x: 40, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
-          className="flex-1 relative rounded-[28px] border border-white/8 overflow-hidden flex flex-col"
+          className="relative flex min-h-[36rem] w-full flex-1 flex-col overflow-hidden rounded-[28px] border border-white/8"
           style={{ background: "rgba(0,0,0,0.25)", boxShadow: "0 40px 100px rgba(0,0,0,0.6)" }}
           ref={panelRef}
           onMouseMove={handleMouseMove}
@@ -1131,8 +1134,8 @@ export function AIGenerator() {
           </AnimatePresence>
 
           {/* ── Top-left: Booth Meta ── */}
-          <div className="absolute top-5 left-5 z-20">
-            <div className="flex items-center gap-3 px-4 py-2.5 rounded-2xl border border-white/10 backdrop-blur-3xl"
+          <div className="relative z-20 flex flex-col gap-3 border-b border-white/8 p-4 sm:p-5 xl:absolute xl:inset-x-5 xl:top-5 xl:flex-row xl:items-start xl:justify-between xl:border-none xl:p-0">
+            <div className="flex items-center gap-3 rounded-2xl border border-white/10 px-4 py-2.5 backdrop-blur-3xl"
               style={{ background: "rgba(0,0,0,0.45)" }}>
               <LayoutGrid className="w-3.5 h-3.5 text-white/40" />
               <div>
@@ -1153,46 +1156,44 @@ export function AIGenerator() {
                 </div>
               )}
             </div>
-          </div>
+            <div className="flex flex-col gap-2.5 sm:flex-row xl:flex-col">
+              {confidence > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+                  className="flex items-center gap-3 rounded-2xl border border-white/10 px-4 py-2.5 backdrop-blur-3xl"
+                  style={{ background: "rgba(0,0,0,0.45)" }}
+                >
+                  <ConfidenceRing value={confidence} color={currentPreset?.accent ?? "#6366f1"} />
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-white/35">AI Confidence</p>
+                    <div className="mt-0.5 flex items-center gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                      <p className="text-[12px] font-bold text-white/90">
+                        {confidence >= 90 ? "Excellent" : confidence >= 80 ? "Optimized" : "Good"}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
 
-          {/* ── Top-right: Confidence + Regenerate ── */}
-          <div className="absolute top-5 right-5 z-20 flex flex-col gap-2.5">
-            {confidence > 0 && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                className="flex items-center gap-3 px-4 py-2.5 rounded-2xl border border-white/10 backdrop-blur-3xl"
+              <motion.button
+                whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                onClick={handleRegenerate}
+                disabled={boothState === "empty" || isGenerating}
+                className="flex min-h-11 items-center justify-center gap-2.5 rounded-2xl border border-white/10 px-4 py-2.5 backdrop-blur-3xl transition-all hover:bg-white/8 disabled:opacity-40"
                 style={{ background: "rgba(0,0,0,0.45)" }}
               >
-                <ConfidenceRing value={confidence} color={currentPreset?.accent ?? "#6366f1"} />
-                <div>
-                  <p className="text-[10px] text-white/35 font-bold uppercase tracking-widest">AI Confidence</p>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                    <p className="text-[12px] font-bold text-white/90">
-                      {confidence >= 90 ? "Excellent" : confidence >= 80 ? "Optimized" : "Good"}
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            <motion.button
-              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-              onClick={handleRegenerate}
-              disabled={boothState === "empty" || isGenerating}
-              className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl border border-white/10 backdrop-blur-3xl hover:bg-white/8 transition-all disabled:opacity-40"
-              style={{ background: "rgba(0,0,0,0.45)" }}
-            >
-              <motion.div animate={isGenerating ? { rotate: 360 } : { rotate: 0 }}
-                transition={{ duration: 1, repeat: isGenerating ? Infinity : 0, ease: "linear" }}>
-                <RefreshCw className="w-3.5 h-3.5 text-white/60" />
-              </motion.div>
-              <span className="text-[11px] font-bold uppercase tracking-widest text-white/70">Regenerate</span>
-            </motion.button>
+                <motion.div animate={isGenerating ? { rotate: 360 } : { rotate: 0 }}
+                  transition={{ duration: 1, repeat: isGenerating ? Infinity : 0, ease: "linear" }}>
+                  <RefreshCw className="w-3.5 h-3.5 text-white/60" />
+                </motion.div>
+                <span className="text-[11px] font-bold uppercase tracking-widest text-white/70">Regenerate</span>
+              </motion.button>
+            </div>
           </div>
 
           {/* ── Centre: 3D Booth with parallax ── */}
-          <div className="flex-1 relative z-10 cursor-crosshair flex items-center justify-center">
+          <div className="relative z-10 flex flex-1 items-center justify-center px-3 py-6 sm:px-5 lg:px-6 xl:px-10 xl:py-10 xl:pt-28 xl:pb-36">
             <motion.div
               style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
               className="w-full h-full"
@@ -1201,9 +1202,9 @@ export function AIGenerator() {
             </motion.div>
           </div>
 
-          {/* ── Bottom-left: Style Sliders ── */}
-          <div className="absolute bottom-5 left-5 z-20 w-[230px]">
-            <div className="flex flex-col gap-4 px-5 py-4 rounded-3xl border border-white/10 backdrop-blur-3xl"
+          {/* ── Bottom Controls ── */}
+          <div className="relative z-20 grid gap-3 border-t border-white/8 p-4 sm:p-5 xl:absolute xl:inset-x-5 xl:bottom-5 xl:grid-cols-[minmax(0,15rem)_auto] xl:items-end xl:border-none xl:p-0">
+            <div className="flex flex-col gap-4 rounded-3xl border border-white/10 px-5 py-4 backdrop-blur-3xl"
               style={{ background: "rgba(0,0,0,0.5)" }}>
               <div className="flex items-center gap-2">
                 <Sliders className="w-3.5 h-3.5 text-white/35" />
@@ -1242,42 +1243,38 @@ export function AIGenerator() {
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* ── Bottom-right: Action Buttons ── */}
-          <div className="absolute bottom-5 right-5 z-20 flex items-center gap-2.5">
-            {/* Apply to Builder */}
-            <motion.button
-              whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-              onClick={() => navigate(`/builder/${boothState === "empty" ? "default" : boothState}`)}
-              className="relative group flex items-center gap-2.5 px-5 py-3 rounded-[18px] overflow-hidden border border-white/20 transition-all"
-              style={{
-                background: "linear-gradient(135deg, rgba(79,70,229,0.95), rgba(147,51,234,0.95))",
-                boxShadow: "0 15px 50px rgba(99,102,241,0.4)",
-              }}
-            >
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.3), rgba(168,85,247,0.3))" }} />
-              <span className="text-[12px] font-bold text-white tracking-widest uppercase relative z-10">Apply to Builder</span>
-              <motion.div
-                animate={{ x: [0, 4, 0] }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                className="relative z-10"
+            <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:justify-end xl:justify-end">
+              <motion.button
+                whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                onClick={() => navigate(`/builder/${boothState === "empty" ? "default" : boothState}`)}
+                className="relative group flex min-h-12 items-center justify-center gap-2.5 overflow-hidden rounded-[18px] border border-white/20 px-5 py-3 text-center transition-all"
+                style={{
+                  background: "linear-gradient(135deg, rgba(79,70,229,0.95), rgba(147,51,234,0.95))",
+                  boxShadow: "0 15px 50px rgba(99,102,241,0.4)",
+                }}
               >
-                <ArrowRight className="w-4 h-4 text-white" />
-              </motion.div>
-            </motion.button>
+                <div className="absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"
+                  style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.3), rgba(168,85,247,0.3))" }} />
+                <span className="relative z-10 text-[12px] font-bold uppercase tracking-widest text-white">Apply to Builder</span>
+                <motion.div
+                  animate={{ x: [0, 4, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                  className="relative z-10"
+                >
+                  <ArrowRight className="w-4 h-4 text-white" />
+                </motion.div>
+              </motion.button>
 
-            {/* View in AR */}
-            <motion.button
-              whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-              onClick={openAR}
-              className="flex items-center gap-2 px-4 py-3 rounded-[18px] border border-white/15 backdrop-blur-3xl hover:bg-white/8 transition-all"
-              style={{ background: "rgba(255,255,255,0.05)" }}
-            >
-              <Maximize2 className="w-4 h-4 text-white/70" />
-              <span className="text-[12px] font-bold text-white/80 tracking-widest uppercase">AR Preview</span>
-            </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                onClick={openAR}
+                className="flex min-h-12 items-center justify-center gap-2 rounded-[18px] border border-white/15 px-4 py-3 backdrop-blur-3xl transition-all hover:bg-white/8"
+                style={{ background: "rgba(255,255,255,0.05)" }}
+              >
+                <Maximize2 className="w-4 h-4 text-white/70" />
+                <span className="text-[12px] font-bold uppercase tracking-widest text-white/80">AR Preview</span>
+              </motion.button>
+            </div>
           </div>
 
         </motion.div>

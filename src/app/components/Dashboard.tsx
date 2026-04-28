@@ -97,7 +97,7 @@ function TiltCard({
   const isOdd = index % 2 !== 0;
 
   return (
-    <div style={{ perspective: 1200 }} className={`w-full ${isOdd ? 'md:mt-16' : ''}`}>
+    <div style={{ perspective: 1200 }} className={`w-full ${isOdd ? "xl:mt-12" : ""}`}>
       <motion.div
         ref={ref}
         style={{
@@ -113,7 +113,7 @@ function TiltCard({
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         onClick={onClick}
-        className="group relative h-[420px] rounded-[32px] overflow-hidden cursor-pointer"
+        className="group relative min-h-[22rem] overflow-hidden rounded-[2rem] cursor-pointer sm:min-h-[24rem] xl:min-h-[26rem]"
       >
         {/* Glassmorphism Background layer */}
         <div className="absolute inset-0 bg-white/[0.03] backdrop-blur-[30px] border border-white/10 rounded-[32px] z-10 transition-all duration-500 group-hover:bg-white/[0.05] group-hover:border-white/20" />
@@ -134,8 +134,8 @@ function TiltCard({
         </div>
 
         {/* Content Layer */}
-        <div 
-          className="relative z-20 h-full p-8 flex flex-col justify-between"
+        <div
+          className="relative z-20 flex h-full flex-col justify-between p-5 sm:p-6 lg:p-8"
           style={{ transform: "translateZ(40px)" }}
         >
           {/* Top section: Badges & Icon */}
@@ -156,10 +156,10 @@ function TiltCard({
           {/* Bottom section: Text & Hints */}
           <div className="space-y-4">
             <div>
-              <div className="text-sm font-semibold text-white/50 uppercase tracking-wider mb-1">
+              <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-white/50 sm:text-sm">
                 {template.category}
               </div>
-              <h3 className="text-3xl font-bold text-white tracking-tight drop-shadow-lg">
+              <h3 className="text-[1.85rem] font-bold tracking-tight text-white drop-shadow-lg sm:text-[2.15rem]">
                 {template.name}
               </h3>
             </div>
@@ -192,7 +192,7 @@ function TiltCard({
 export function Dashboard() {
   const navigate = useNavigate();
   return (
-    <div className="min-h-screen bg-[#050508] relative overflow-hidden font-sans selection:bg-purple-500/30">
+    <div className="relative min-h-[100svh] overflow-hidden bg-[#050508] font-sans selection:bg-purple-500/30">
       {/* Immersive Background */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Subtle noise texture */}
@@ -219,35 +219,35 @@ export function Dashboard() {
         />
       </div>
 
-      <div className="relative z-20 px-6 py-24 max-w-7xl mx-auto min-h-screen flex flex-col xl:flex-row items-center gap-16">
+      <div className="relative z-20 mx-auto flex min-h-[100svh] w-full max-w-[var(--content-max-width)] flex-col gap-12 px-[var(--page-gutter)] py-16 sm:gap-14 sm:py-20 lg:py-24 xl:grid xl:grid-cols-[minmax(0,0.92fr)_minmax(18rem,0.88fr)] xl:items-center xl:gap-16">
         
         {/* Hero Section */}
         <motion.div
           initial={{ opacity: 0, x: -40 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="flex-1 text-left xl:pr-12 pt-12 xl:pt-0"
+          className="flex w-full flex-col text-left pt-6 sm:pt-10 xl:pr-12 xl:pt-0"
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8 shadow-2xl">
             <Sparkles className="w-4 h-4 text-blue-400" />
             <span className="text-sm font-medium text-white/80 tracking-wide">Next-Gen Spatial Builder</span>
           </div>
           
-          <h1 className="text-6xl sm:text-7xl lg:text-8xl font-bold text-white tracking-tight leading-[1.05] mb-6">
-            Step Into Your <br className="hidden lg:block" />
+          <h1 className="mb-6 text-[clamp(2.9rem,9vw,6.6rem)] font-bold leading-[1.02] tracking-tight text-white">
+            Step Into Your <br className="hidden xl:block" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400">
               Booth Before It Exists
             </span>
           </h1>
           
-          <p className="text-xl sm:text-2xl text-white/50 font-light max-w-2xl leading-relaxed mb-10">
+          <p className="mb-10 max-w-2xl text-[clamp(1.05rem,2.8vw,1.5rem)] font-light leading-relaxed text-white/50">
             Start with a vibe. Customize everything. Walk it in AR. Experience your floor plan at real-world scale instantly.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-12">
+          <div className="mb-12 flex flex-col items-stretch gap-4 sm:flex-row sm:items-center">
             <button 
               onClick={() => navigate('/ai')}
-              className="group relative flex items-center gap-3 px-8 py-4 rounded-2xl overflow-hidden shadow-[0_0_40px_rgba(168,85,247,0.3)] hover:shadow-[0_0_60px_rgba(168,85,247,0.5)] transition-all border border-white/20"
+              className="group relative flex min-h-12 w-full items-center justify-center gap-3 overflow-hidden rounded-2xl border border-white/20 px-6 py-4 shadow-[0_0_40px_rgba(168,85,247,0.3)] transition-all hover:shadow-[0_0_60px_rgba(168,85,247,0.5)] sm:w-auto"
               style={{
                 background: "linear-gradient(135deg, rgba(147,51,234,0.8) 0%, rgba(79,70,229,0.8) 100%)",
                 backdropFilter: "blur(20px)",
@@ -257,7 +257,9 @@ export function Dashboard() {
               <Sparkles className="w-5 h-5 text-white" />
               <span className="text-base font-bold text-white tracking-wide relative z-10">Generate with AI</span>
             </button>
-            <span className="text-sm font-medium text-white/40 tracking-wider uppercase">or pick a template &rarr;</span>
+            <span className="text-sm font-medium uppercase tracking-wider text-white/40">
+              or pick a template &rarr;
+            </span>
           </div>
 
           {/* Particles/Shimmer line */}
@@ -269,7 +271,7 @@ export function Dashboard() {
             />
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
+          <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
              <div className="flex -space-x-4">
                {[1,2,3].map((i) => (
                  <div key={i} className="w-12 h-12 rounded-full border-2 border-[#050508] bg-white/10 backdrop-blur-md overflow-hidden flex items-center justify-center shadow-lg">
@@ -277,15 +279,15 @@ export function Dashboard() {
                  </div>
                ))}
              </div>
-             <p className="text-sm text-white/50 leading-relaxed">
+             <p className="text-sm leading-relaxed text-white/50">
                Join <strong className="text-white/90">2,000+</strong> designers<br/> building the future of events.
              </p>
           </div>
         </motion.div>
 
         {/* Templates Grid */}
-        <div className="flex-1 w-full max-w-3xl">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 pb-20 xl:pb-0">
+        <div className="w-full xl:max-w-[48rem] xl:justify-self-end">
+          <div className="grid grid-cols-1 gap-5 pb-8 sm:grid-cols-2 sm:gap-6 xl:pb-0">
             {templates.map((template, index) => (
               <TiltCard 
                 key={template.id}
