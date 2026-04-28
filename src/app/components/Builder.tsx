@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   Activity,
   ArrowLeft,
+  ChevronUp,
   Boxes,
   Copy,
   Eye,
@@ -17,7 +18,16 @@ import {
   Sun,
   Trash2,
 } from "lucide-react";
-import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 import { Link, useNavigate, useOutletContext, useParams } from "react-router";
 import { BoothCanvas } from "./BoothCanvas";
 import type { RootOutletContext } from "./Root";
@@ -39,6 +49,13 @@ import {
   SheetHeader,
   SheetTitle,
 } from "./ui/sheet";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from "./ui/drawer";
 import { useIsMobile } from "./ui/use-mobile";
 import { cn } from "./ui/utils";
 import {
@@ -376,6 +393,241 @@ function DesktopCommandRail({
   );
 }
 
+function InspectorPanel({
+  booth,
+  copyLabel,
+  selectedConfig,
+  selectedFootprint,
+  selectedId,
+  selectedItem,
+  shareUrl,
+  duplicateSelected,
+  rotateSelected,
+  setBooth,
+  setCopyLabel,
+  setItems,
+  setSelectedId,
+  showIntro = true,
+  updateSelectedItem,
+}: {
+  booth: BoothDefinition;
+  copyLabel: string;
+  selectedConfig: LibraryItemDefinition | null;
+  selectedFootprint: { width: number; depth: number } | null;
+  selectedId: number | null;
+  selectedItem: BoothItem | null;
+  shareUrl: string;
+  duplicateSelected: () => void;
+  rotateSelected: (delta: number) => void;
+  setBooth: Dispatch<SetStateAction<BoothDefinition>>;
+  setCopyLabel: Dispatch<SetStateAction<string>>;
+  setItems: Dispatch<SetStateAction<BoothItem[]>>;
+  setSelectedId: Dispatch<SetStateAction<number | null>>;
+  showIntro?: boolean;
+  updateSelectedItem: (updates: Partial<BoothItem>) => void;
+}) {
+  return (
+    <>
+      {showIntro ? (
+        <>
+          <p className="text-[11px] uppercase tracking-[0.28em] text-white/45">Inspector</p>
+          <h2 className="mt-2 text-2xl font-semibold">Deployment controls</h2>
+          <p className="mt-2 text-sm leading-6 text-white/55">
+            Finalize the booth definition, push a mobile handoff link, and tune the selected component before launch.
+          </p>
+        </>
+      ) : null}
+
+      <div className={cn("space-y-4", showIntro ? "mt-5" : "mt-0")}>
+        <label className="block">
+          <span className="mb-2 block text-sm font-medium text-white/65">Project name</span>
+          <input
+            value={booth.name}
+            onChange={(event) =>
+              setBooth((current) => sanitizeBooth({ ...current, name: event.target.value }))
+            }
+            className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-violet-300/40"
+          />
+        </label>
+
+        <div className="grid grid-cols-2 gap-3">
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-white/65">Width</span>
+            <input
+              type="number"
+              min={10}
+              max={40}
+              value={booth.width}
+              onChange={(event) =>
+                setBooth((current) => sanitizeBooth({ ...current, width: Number(event.target.value) }))
+              }
+              className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-violet-300/40"
+            />
+          </label>
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-white/65">Depth</span>
+            <input
+              type="number"
+              min={10}
+              max={40}
+              value={booth.depth}
+              onChange={(event) =>
+                setBooth((current) => sanitizeBooth({ ...current, depth: Number(event.target.value) }))
+              }
+              className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-violet-300/40"
+            />
+          </label>
+        </div>
+
+        <label className="block">
+          <span className="mb-2 block text-sm font-medium text-white/65">Ops note</span>
+          <textarea
+            rows={4}
+            value={booth.note}
+            onChange={(event) =>
+              setBooth((current) => sanitizeBooth({ ...current, note: event.target.value }))
+            }
+            className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-violet-300/40"
+          />
+        </label>
+
+        <div className="rounded-[24px] border border-white/10 bg-black/20 p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.22em] text-white/45">Mobile AR link</p>
+              <p className="mt-1 text-sm text-white/65">Open this exact layout on another device.</p>
+            </div>
+            <MonitorPlay className="h-5 w-5 text-violet-300" />
+          </div>
+          <textarea
+            rows={4}
+            value={shareUrl}
+            readOnly
+            className="mt-4 w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-xs leading-6 text-white/70"
+          />
+          <button
+            type="button"
+            onClick={async () => {
+              const copied = await copyText(shareUrl);
+              setCopyLabel(copied ? "Copied" : "Clipboard unavailable");
+            }}
+            className="mt-3 inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-medium text-white/80 transition hover:bg-white/[0.08]"
+          >
+            <Copy className="h-4 w-4" />
+            {copyLabel}
+          </button>
+        </div>
+
+        <div className="rounded-[24px] border border-white/10 bg-black/20 p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.22em] text-white/45">Selection</p>
+              <p className="mt-1 text-lg font-semibold text-white">
+                {selectedItem ? selectedItem.label : "Nothing selected"}
+              </p>
+            </div>
+            <Activity className="h-5 w-5 text-violet-300" />
+          </div>
+
+          {selectedItem && selectedConfig && selectedFootprint && selectedId ? (
+            <div className="mt-4 space-y-4">
+              <p className="text-sm leading-6 text-white/55">{selectedConfig.description}</p>
+
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-white/65">Label</span>
+                <input
+                  value={selectedItem.label}
+                  onChange={(event) => updateSelectedItem({ label: event.target.value })}
+                  className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-violet-300/40"
+                />
+              </label>
+
+              <div className="grid grid-cols-2 gap-3">
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-white/65">X</span>
+                  <input
+                    type="number"
+                    value={selectedItem.x}
+                    onChange={(event) => updateSelectedItem({ x: Number(event.target.value) })}
+                    className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-violet-300/40"
+                  />
+                </label>
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-white/65">Y</span>
+                  <input
+                    type="number"
+                    value={selectedItem.y}
+                    onChange={(event) => updateSelectedItem({ y: Number(event.target.value) })}
+                    className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-violet-300/40"
+                  />
+                </label>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-3">
+                  <p className="text-[10px] uppercase tracking-[0.16em] text-white/45">Footprint</p>
+                  <p className="mt-2 text-sm font-semibold text-white">
+                    {selectedFootprint.width} x {selectedFootprint.depth} ft
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-3">
+                  <p className="text-[10px] uppercase tracking-[0.16em] text-white/45">Rotation</p>
+                  <p className="mt-2 text-sm font-semibold text-white">{selectedItem.rotation}deg</p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-3">
+                  <p className="text-[10px] uppercase tracking-[0.16em] text-white/45">Category</p>
+                  <p className="mt-2 text-sm font-semibold capitalize text-white">
+                    {selectedConfig.category}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => rotateSelected(-90)}
+                  className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white/80 transition hover:bg-white/[0.08]"
+                >
+                  Rotate -90deg
+                </button>
+                <button
+                  type="button"
+                  onClick={() => rotateSelected(90)}
+                  className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white/80 transition hover:bg-white/[0.08]"
+                >
+                  Rotate +90deg
+                </button>
+                <button
+                  type="button"
+                  onClick={duplicateSelected}
+                  className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white/80 transition hover:bg-white/[0.08]"
+                >
+                  Duplicate
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setItems((current) => current.filter((item) => item.id !== selectedId));
+                    setSelectedId(null);
+                  }}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-rose-400/15 bg-rose-500/10 px-4 py-3 text-sm font-medium text-rose-200 transition hover:bg-rose-500/16"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Remove
+                </button>
+              </div>
+            </div>
+          ) : (
+            <p className="mt-4 text-sm leading-6 text-white/55">
+              Select a placed component to tune its label, footprint orientation, and exact position before deployment.
+            </p>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
 export function Builder() {
   const { templateId = "default" } = useParams();
   const navigate = useNavigate();
@@ -392,6 +644,7 @@ export function Builder() {
   const [copyLabel, setCopyLabel] = useState("Copy share link");
   const [commandOpen, setCommandOpen] = useState(false);
   const [componentMenuOpen, setComponentMenuOpen] = useState(true);
+  const [mobileInspectorOpen, setMobileInspectorOpen] = useState(false);
 
   const metrics = useMemo(() => deriveMetrics(booth, items), [booth, items]);
   const selectedItem = useMemo(
@@ -486,6 +739,12 @@ export function Builder() {
 
     window.addEventListener("keydown", onShortcut);
     return () => window.removeEventListener("keydown", onShortcut);
+  }, [isMobile]);
+
+  useEffect(() => {
+    if (!isMobile) {
+      setMobileInspectorOpen(false);
+    }
   }, [isMobile]);
 
   const addItem = useCallback(
@@ -762,7 +1021,7 @@ export function Builder() {
         </div>
       </header>
 
-      <div className="mx-auto grid max-w-[1600px] gap-4 px-4 py-4 lg:px-6 xl:grid-cols-[minmax(0,1fr),320px]">
+      <div className="mx-auto grid max-w-[1600px] gap-4 px-4 py-4 pb-24 lg:px-6 xl:grid-cols-[minmax(0,1fr),320px] xl:pb-4">
         <div
           className={cn(
             "relative min-w-0 transition-[padding] duration-300",
@@ -793,201 +1052,77 @@ export function Builder() {
             onMoveItem={moveItem}
             onSelectItem={setSelectedId}
           />
+
+          <button
+            type="button"
+            onClick={() => setMobileInspectorOpen(true)}
+            className="absolute right-4 top-4 z-20 inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white shadow-[0_18px_40px_rgba(0,0,0,0.35)] backdrop-blur-2xl transition hover:bg-black/75 xl:hidden"
+          >
+            <ChevronUp className="h-4 w-4 text-violet-200" />
+            Pull Tools
+          </button>
         </div>
 
-        <aside className="rounded-[32px] border border-white/10 bg-white/[0.04] p-5 shadow-[0_25px_70px_rgba(0,0,0,0.35)] backdrop-blur-2xl">
-          <p className="text-[11px] uppercase tracking-[0.28em] text-white/45">Inspector</p>
-          <h2 className="mt-2 text-2xl font-semibold">Deployment controls</h2>
-          <p className="mt-2 text-sm leading-6 text-white/55">
-            Finalize the booth definition, push a mobile handoff link, and tune the selected component before launch.
-          </p>
-
-          <div className="mt-5 space-y-4">
-            <label className="block">
-              <span className="mb-2 block text-sm font-medium text-white/65">Project name</span>
-              <input
-                value={booth.name}
-                onChange={(event) =>
-                  setBooth((current) => sanitizeBooth({ ...current, name: event.target.value }))
-                }
-                className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-violet-300/40"
-              />
-            </label>
-
-            <div className="grid grid-cols-2 gap-3">
-              <label className="block">
-                <span className="mb-2 block text-sm font-medium text-white/65">Width</span>
-                <input
-                  type="number"
-                  min={10}
-                  max={40}
-                  value={booth.width}
-                  onChange={(event) =>
-                    setBooth((current) => sanitizeBooth({ ...current, width: Number(event.target.value) }))
-                  }
-                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-violet-300/40"
-                />
-              </label>
-              <label className="block">
-                <span className="mb-2 block text-sm font-medium text-white/65">Depth</span>
-                <input
-                  type="number"
-                  min={10}
-                  max={40}
-                  value={booth.depth}
-                  onChange={(event) =>
-                    setBooth((current) => sanitizeBooth({ ...current, depth: Number(event.target.value) }))
-                  }
-                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-violet-300/40"
-                />
-              </label>
-            </div>
-
-            <label className="block">
-              <span className="mb-2 block text-sm font-medium text-white/65">Ops note</span>
-              <textarea
-                rows={4}
-                value={booth.note}
-                onChange={(event) =>
-                  setBooth((current) => sanitizeBooth({ ...current, note: event.target.value }))
-                }
-                className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-violet-300/40"
-              />
-            </label>
-
-            <div className="rounded-[24px] border border-white/10 bg-black/20 p-4">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-white/45">Mobile AR link</p>
-                  <p className="mt-1 text-sm text-white/65">Open this exact layout on another device.</p>
-                </div>
-                <MonitorPlay className="h-5 w-5 text-violet-300" />
-              </div>
-              <textarea
-                rows={4}
-                value={shareUrl}
-                readOnly
-                className="mt-4 w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-xs leading-6 text-white/70"
-              />
-              <button
-                type="button"
-                onClick={async () => {
-                  const copied = await copyText(shareUrl);
-                  setCopyLabel(copied ? "Copied" : "Clipboard unavailable");
-                }}
-                className="mt-3 inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-medium text-white/80 transition hover:bg-white/[0.08]"
-              >
-                <Copy className="h-4 w-4" />
-                {copyLabel}
-              </button>
-            </div>
-
-            <div className="rounded-[24px] border border-white/10 bg-black/20 p-4">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-white/45">Selection</p>
-                  <p className="mt-1 text-lg font-semibold text-white">
-                    {selectedItem ? selectedItem.label : "Nothing selected"}
-                  </p>
-                </div>
-                <Activity className="h-5 w-5 text-violet-300" />
-              </div>
-
-              {selectedItem && selectedConfig && selectedFootprint ? (
-                <div className="mt-4 space-y-4">
-                  <p className="text-sm leading-6 text-white/55">{selectedConfig.description}</p>
-
-                  <label className="block">
-                    <span className="mb-2 block text-sm font-medium text-white/65">Label</span>
-                    <input
-                      value={selectedItem.label}
-                      onChange={(event) => updateSelectedItem({ label: event.target.value })}
-                      className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-violet-300/40"
-                    />
-                  </label>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <label className="block">
-                      <span className="mb-2 block text-sm font-medium text-white/65">X</span>
-                      <input
-                        type="number"
-                        value={selectedItem.x}
-                        onChange={(event) => updateSelectedItem({ x: Number(event.target.value) })}
-                        className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-violet-300/40"
-                      />
-                    </label>
-                    <label className="block">
-                      <span className="mb-2 block text-sm font-medium text-white/65">Y</span>
-                      <input
-                        type="number"
-                        value={selectedItem.y}
-                        onChange={(event) => updateSelectedItem({ y: Number(event.target.value) })}
-                        className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-violet-300/40"
-                      />
-                    </label>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-3">
-                      <p className="text-[10px] uppercase tracking-[0.16em] text-white/45">Footprint</p>
-                      <p className="mt-2 text-sm font-semibold text-white">
-                        {selectedFootprint.width} x {selectedFootprint.depth} ft
-                      </p>
-                    </div>
-                    <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-3">
-                      <p className="text-[10px] uppercase tracking-[0.16em] text-white/45">Rotation</p>
-                      <p className="mt-2 text-sm font-semibold text-white">{selectedItem.rotation}deg</p>
-                    </div>
-                    <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-3">
-                      <p className="text-[10px] uppercase tracking-[0.16em] text-white/45">Category</p>
-                      <p className="mt-2 text-sm font-semibold capitalize text-white">{selectedConfig.category}</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => rotateSelected(-90)}
-                      className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white/80 transition hover:bg-white/[0.08]"
-                    >
-                      Rotate -90deg
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => rotateSelected(90)}
-                      className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white/80 transition hover:bg-white/[0.08]"
-                    >
-                      Rotate +90deg
-                    </button>
-                    <button
-                      type="button"
-                      onClick={duplicateSelected}
-                      className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white/80 transition hover:bg-white/[0.08]"
-                    >
-                      Duplicate
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setItems((current) => current.filter((item) => item.id !== selectedItem.id));
-                        setSelectedId(null);
-                      }}
-                      className="inline-flex items-center justify-center gap-2 rounded-2xl border border-rose-400/15 bg-rose-500/10 px-4 py-3 text-sm font-medium text-rose-200 transition hover:bg-rose-500/16"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <p className="mt-4 text-sm leading-6 text-white/55">
-                  Select a placed component to tune its label, footprint orientation, and exact position before deployment.
-                </p>
-              )}
-            </div>
-          </div>
+        <aside className="hidden rounded-[32px] border border-white/10 bg-white/[0.04] p-5 shadow-[0_25px_70px_rgba(0,0,0,0.35)] backdrop-blur-2xl xl:block">
+          <InspectorPanel
+            booth={booth}
+            copyLabel={copyLabel}
+            selectedConfig={selectedConfig}
+            selectedFootprint={selectedFootprint}
+            selectedId={selectedId}
+            selectedItem={selectedItem}
+            shareUrl={shareUrl}
+            duplicateSelected={duplicateSelected}
+            rotateSelected={rotateSelected}
+            setBooth={setBooth}
+            setCopyLabel={setCopyLabel}
+            setItems={setItems}
+            setSelectedId={setSelectedId}
+            updateSelectedItem={updateSelectedItem}
+          />
         </aside>
       </div>
+
+      <Drawer open={isMobile && mobileInspectorOpen} onOpenChange={setMobileInspectorOpen}>
+        <DrawerContent className="border-white/10 bg-[linear-gradient(180deg,rgba(11,11,18,0.98),rgba(5,5,10,0.99))] text-white">
+          <DrawerHeader className="border-b border-white/10 px-4 pb-4 pt-5">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <DrawerTitle className="text-white">Footprint and tools</DrawerTitle>
+                <DrawerDescription className="mt-1 text-white/55">
+                  Pull this panel open when you need sizing, notes, selection edits, or AR handoff controls.
+                </DrawerDescription>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMobileInspectorOpen(false)}
+                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70 transition hover:bg-white/[0.08] hover:text-white"
+              >
+                Hide
+              </button>
+            </div>
+          </DrawerHeader>
+          <div className="min-h-0 overflow-y-auto px-4 pb-6 pt-4">
+            <InspectorPanel
+              booth={booth}
+              copyLabel={copyLabel}
+              selectedConfig={selectedConfig}
+              selectedFootprint={selectedFootprint}
+              selectedId={selectedId}
+              selectedItem={selectedItem}
+              shareUrl={shareUrl}
+              duplicateSelected={duplicateSelected}
+              rotateSelected={rotateSelected}
+              setBooth={setBooth}
+              setCopyLabel={setCopyLabel}
+              setItems={setItems}
+              setSelectedId={setSelectedId}
+              showIntro={false}
+              updateSelectedItem={updateSelectedItem}
+            />
+          </div>
+        </DrawerContent>
+      </Drawer>
 
       <Sheet open={isMobile && componentMenuOpen} onOpenChange={setComponentMenuOpen}>
         <SheetContent
