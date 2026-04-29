@@ -79,6 +79,13 @@ import {
   type BuilderCategory,
   type LibraryItemDefinition,
 } from "../lib/boothBuilder";
+import {
+  deleteCloudProject,
+  hasProjectCloudConfig,
+  listCloudProjects,
+  saveCloudProject,
+  type CloudBoothProject,
+} from "../lib/projectCloud";
 
 type MenuCategory = "all" | BuilderCategory;
 
@@ -396,11 +403,17 @@ function DesktopCommandRail({
 function InspectorPanel({
   booth,
   copyLabel,
+  cloudProjects,
+  cloudStatus,
+  cloudBusy,
   selectedConfig,
   selectedFootprint,
   selectedId,
   selectedItem,
   shareUrl,
+  saveCloudSnapshot,
+  loadCloudSnapshot,
+  removeCloudSnapshot,
   duplicateSelected,
   rotateSelected,
   setBooth,
@@ -412,11 +425,17 @@ function InspectorPanel({
 }: {
   booth: BoothDefinition;
   copyLabel: string;
+  cloudProjects: CloudBoothProject[];
+  cloudStatus: string;
+  cloudBusy: boolean;
   selectedConfig: LibraryItemDefinition | null;
   selectedFootprint: { width: number; depth: number } | null;
   selectedId: number | null;
   selectedItem: BoothItem | null;
   shareUrl: string;
+  saveCloudSnapshot: () => void;
+  loadCloudSnapshot: (project: CloudBoothProject) => void;
+  removeCloudSnapshot: (projectId: string) => void;
   duplicateSelected: () => void;
   rotateSelected: (delta: number) => void;
   setBooth: Dispatch<SetStateAction<BoothDefinition>>;
@@ -516,6 +535,71 @@ function InspectorPanel({
             <Copy className="h-4 w-4" />
             {copyLabel}
           </button>
+        </div>
+
+        <div className="rounded-[24px] border border-white/10 bg-black/20 p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.22em] text-white/45">Cloud project library</p>
+              <p className="mt-1 text-sm text-white/65">
+                {hasProjectCloudConfig
+                  ? "Save booth snapshots to Supabase and reload them into the builder."
+                  : "Add Supabase keys to enable cloud project saves."}
+              </p>
+            </div>
+            <Save className="h-5 w-5 text-violet-300" />
+          </div>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <button
+              type="button"
+              disabled={!hasProjectCloudConfig || cloudBusy}
+              onClick={saveCloudSnapshot}
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-medium text-white/80 transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Save className="h-4 w-4" />
+              {cloudBusy ? "Saving..." : "Save cloud snapshot"}
+            </button>
+            <p className="text-xs leading-6 text-white/45">{cloudStatus}</p>
+          </div>
+          {cloudProjects.length ? (
+            <div className="mt-4 space-y-3">
+              {cloudProjects.map((project) => (
+                <div
+                  key={project.id}
+                  className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-white">{project.projectName}</p>
+                      <p className="mt-1 text-xs uppercase tracking-[0.18em] text-white/45">
+                        {project.templateId} · {new Date(project.updatedAt).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => loadCloudSnapshot(project)}
+                        className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70 transition hover:bg-white/[0.08] hover:text-white"
+                      >
+                        Load
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeCloudSnapshot(project.id)}
+                        className="rounded-full border border-rose-400/15 bg-rose-500/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-rose-200 transition hover:bg-rose-500/16"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : hasProjectCloudConfig ? (
+            <p className="mt-4 text-sm leading-6 text-white/55">
+              No cloud snapshots yet. Save the current booth to create the first library entry.
+            </p>
+          ) : null}
         </div>
 
         <div className="rounded-[24px] border border-white/10 bg-black/20 p-4">
@@ -645,6 +729,13 @@ export function Builder() {
   const [commandOpen, setCommandOpen] = useState(false);
   const [componentMenuOpen, setComponentMenuOpen] = useState(true);
   const [mobileInspectorOpen, setMobileInspectorOpen] = useState(false);
+  const [cloudProjects, setCloudProjects] = useState<CloudBoothProject[]>([]);
+  const [cloudBusy, setCloudBusy] = useState(false);
+  const [cloudStatus, setCloudStatus] = useState(
+    hasProjectCloudConfig
+      ? "Cloud saves ready."
+      : "Supabase cloud save is not configured."
+  );
 
   const metrics = useMemo(() => deriveMetrics(booth, items), [booth, items]);
   const selectedItem = useMemo(
@@ -661,6 +752,82 @@ export function Builder() {
     const baseUrl = `${window.location.origin}/builder/${booth.templateId || templateId}`;
     return buildShareUrl(baseUrl, serializeProject(booth, items));
   }, [booth, items, templateId]);
+  const refreshCloudProjects = useCallback(async () => {
+    if (!hasProjectCloudConfig) {
+      setCloudProjects([]);
+      return;
+    }
+
+    setCloudBusy(true);
+    try {
+      const projects = await listCloudProjects();
+      setCloudProjects(projects);
+      setCloudStatus(
+        projects.length
+          ? `${projects.length} cloud project${projects.length === 1 ? "" : "s"} available.`
+          : "Cloud connected. Save the first booth snapshot."
+      );
+    } catch (error) {
+      setCloudStatus(
+        error instanceof Error ? error.message : "Cloud project library is unavailable."
+      );
+    } finally {
+      setCloudBusy(false);
+    }
+  }, []);
+
+  const saveCloudSnapshot = useCallback(async () => {
+    if (!hasProjectCloudConfig) {
+      setCloudStatus("Add Supabase keys to enable cloud saves.");
+      return;
+    }
+
+    setCloudBusy(true);
+    try {
+      const saved = await saveCloudProject({
+        templateId: booth.templateId,
+        projectName: booth.name || "Untitled Booth",
+        shareUrl,
+        project: serializeProject(booth, items),
+      });
+      setCloudStatus(`Saved ${saved.projectName} to the cloud library.`);
+      await refreshCloudProjects();
+    } catch (error) {
+      setCloudStatus(
+        error instanceof Error ? error.message : "Failed to save this booth to the cloud."
+      );
+      setCloudBusy(false);
+    }
+  }, [booth, items, shareUrl, refreshCloudProjects]);
+
+  const loadCloudSnapshot = useCallback((project: CloudBoothProject) => {
+    const sanitized = sanitizeProject(project.project);
+    setBooth(sanitized.booth);
+    setItems(sanitized.items);
+    setSelectedId(null);
+    setCloudStatus(`Loaded ${project.projectName}.`);
+  }, []);
+
+  const removeCloudSnapshot = useCallback(
+    async (projectId: string) => {
+      if (!hasProjectCloudConfig) {
+        return;
+      }
+
+      setCloudBusy(true);
+      try {
+        await deleteCloudProject(projectId);
+        setCloudStatus("Cloud snapshot removed.");
+        await refreshCloudProjects();
+      } catch (error) {
+        setCloudStatus(
+          error instanceof Error ? error.message : "Failed to delete the cloud snapshot."
+        );
+        setCloudBusy(false);
+      }
+    },
+    [refreshCloudProjects]
+  );
   const visibleLibraryItems = useMemo(
     () =>
       activeCategory === "all"
@@ -713,6 +880,10 @@ export function Builder() {
       sourceLabel: booth.name,
     });
   }, [booth, items, openAR, shareUrl]);
+
+  useEffect(() => {
+    void refreshCloudProjects();
+  }, [refreshCloudProjects]);
 
   useEffect(() => {
     setItems((current) => clampItemsToBooth(current, booth));
@@ -1067,11 +1238,17 @@ export function Builder() {
           <InspectorPanel
             booth={booth}
             copyLabel={copyLabel}
+            cloudProjects={cloudProjects}
+            cloudStatus={cloudStatus}
+            cloudBusy={cloudBusy}
             selectedConfig={selectedConfig}
             selectedFootprint={selectedFootprint}
             selectedId={selectedId}
             selectedItem={selectedItem}
             shareUrl={shareUrl}
+            saveCloudSnapshot={saveCloudSnapshot}
+            loadCloudSnapshot={loadCloudSnapshot}
+            removeCloudSnapshot={removeCloudSnapshot}
             duplicateSelected={duplicateSelected}
             rotateSelected={rotateSelected}
             setBooth={setBooth}
@@ -1106,11 +1283,17 @@ export function Builder() {
             <InspectorPanel
               booth={booth}
               copyLabel={copyLabel}
+              cloudProjects={cloudProjects}
+              cloudStatus={cloudStatus}
+              cloudBusy={cloudBusy}
               selectedConfig={selectedConfig}
               selectedFootprint={selectedFootprint}
               selectedId={selectedId}
               selectedItem={selectedItem}
               shareUrl={shareUrl}
+              saveCloudSnapshot={saveCloudSnapshot}
+              loadCloudSnapshot={loadCloudSnapshot}
+              removeCloudSnapshot={removeCloudSnapshot}
               duplicateSelected={duplicateSelected}
               rotateSelected={rotateSelected}
               setBooth={setBooth}

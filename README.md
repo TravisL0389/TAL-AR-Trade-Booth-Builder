@@ -9,6 +9,7 @@ This folder is now the merged, active app. The standalone `/Users/travislangolf/
 - Drag, place, rotate, duplicate, and delete interactions
 - Template-based booth presets
 - Autosave and shareable AR handoff links
+- Optional Supabase-backed cloud project library for saved booth snapshots
 - Camera-overlay rehearsal fallback
 - Live WebXR launcher for compatible devices
 
@@ -25,8 +26,13 @@ This folder is now the merged, active app. The standalone `/Users/travislangolf/
 
 ```bash
 npm install
+cp .env.example .env.local
 npm run dev
 ```
+
+Cloud project saves are optional. If you add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`, the builder can save named layout snapshots to Supabase in addition to its existing local autosave and share-link flow.
+
+Apply `supabase/migrations/20260429_booth_project_library.sql` to enable the cloud library table.
 
 ## Verification
 
