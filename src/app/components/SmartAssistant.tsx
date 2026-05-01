@@ -10,7 +10,7 @@ interface Suggestion {
   actionLabel: string;
   category?: BuilderCategory;
   opensAr?: boolean;
-  tone: "violet" | "blue" | "emerald" | "amber";
+  tone: "cyan" | "blue" | "emerald" | "amber";
 }
 
 const SUGGESTIONS: Suggestion[] = [
@@ -20,7 +20,7 @@ const SUGGESTIONS: Suggestion[] = [
     body: "Add a chair or meeting surface first so the visitor flow has a clear center of gravity.",
     actionLabel: "Open Seating",
     category: "seating",
-    tone: "violet",
+    tone: "cyan",
   },
   {
     id: "branding",
@@ -49,11 +49,11 @@ const SUGGESTIONS: Suggestion[] = [
 ];
 
 const TONE_STYLES = {
-  violet: {
-    glow: "rgba(139,92,246,0.4)",
-    accent: "from-violet-500/85",
-    button: "bg-violet-500/18 text-violet-200",
-    text: "text-violet-300",
+  cyan: {
+    glow: "rgba(34,211,238,0.4)",
+    accent: "from-cyan-400/85",
+    button: "bg-cyan-400/18 text-cyan-100",
+    text: "text-cyan-300",
   },
   blue: {
     glow: "rgba(96,165,250,0.4)",

@@ -1,18 +1,39 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from "motion/react";
 import { useNavigate, useOutletContext } from "react-router";
 import {
   Sparkles, Mic, Send, Eye, Wand2, Sliders,
-  CheckCircle2, ArrowRight, Activity, Zap, Command, Layers, Home,
+  CheckCircle2, ArrowRight, Activity, Zap, Command,
   RefreshCw, ChevronRight, LayoutGrid, TrendingUp, Users, Target,
-  MicOff, Volume2, Play, Pause, Star, Shield, Cpu, Globe,
+  MicOff, Star, Shield, Cpu, Globe,
   Maximize2, BarChart3, MousePointer, Lightbulb, Boxes
 } from "lucide-react";
+import { PageHeader } from "./PageHeader";
+import type { RootOutletContext } from "./Root";
+import { createProjectFromTemplate } from "../lib/boothBuilder";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type BoothTheme = "empty" | "tech" | "luxury" | "nature" | "minimal" | "neon";
 type AppMode = "chat" | "auto" | "optimize";
+
+function resolveBuilderTemplateId(theme: BoothTheme) {
+  switch (theme) {
+    case "tech":
+      return "tech";
+    case "luxury":
+      return "luxury";
+    case "minimal":
+      return "minimal";
+    case "nature":
+      return "showcase";
+    case "neon":
+      return "tech";
+    case "empty":
+    default:
+      return "default";
+  }
+}
 
 interface MessageChip {
   label: string;
@@ -45,8 +66,8 @@ const PRESETS: BoothPreset[] = [
     id: "tech",
     label: "Tech Nexus",
     description: "High-contrast LED walls, curved displays, modular zones",
-    gradient: "from-blue-600/30 to-indigo-600/30",
-    accent: "#6366f1",
+    gradient: "from-cyan-500/30 to-sky-500/25",
+    accent: "#22d3ee",
     tags: ["Interactive", "Futuristic", "LED"],
     confidence: 87,
   },
@@ -81,8 +102,8 @@ const PRESETS: BoothPreset[] = [
     id: "neon",
     label: "Cyberpunk Rave",
     description: "UV reactive panels, holographic displays, gradient fog",
-    gradient: "from-pink-600/30 to-purple-600/30",
-    accent: "#ec4899",
+    gradient: "from-fuchsia-500/20 to-cyan-500/20",
+    accent: "#f472b6",
     tags: ["Statement", "Bold", "Energy"],
     confidence: 94,
   },
@@ -177,8 +198,8 @@ const AI_RESPONSES: Record<string, { text: string; bullets?: string[]; theme?: B
 // ─── Optimize Metrics ────────────────────────────────────────────────────────
 
 const OPTIMIZE_METRICS = [
-  { label: "Visitor Engagement", value: 87, color: "#6366f1", icon: <Users className="w-3.5 h-3.5" /> },
-  { label: "Brand Recall", value: 74, color: "#a855f7", icon: <Target className="w-3.5 h-3.5" /> },
+  { label: "Visitor Engagement", value: 87, color: "#22d3ee", icon: <Users className="w-3.5 h-3.5" /> },
+  { label: "Brand Recall", value: 74, color: "#14b8a6", icon: <Target className="w-3.5 h-3.5" /> },
   { label: "Lead Capture Rate", value: 91, color: "#10b981", icon: <BarChart3 className="w-3.5 h-3.5" /> },
   { label: "Spatial Flow", value: 68, color: "#f59e0b", icon: <MousePointer className="w-3.5 h-3.5" /> },
 ];
@@ -191,7 +212,7 @@ const OPTIMIZE_SUGGESTIONS = [
 
 // ─── Animated Confidence Ring ───────────────────────────────��─────────────────
 
-function ConfidenceRing({ value, color = "#6366f1" }: { value: number; color?: string }) {
+function ConfidenceRing({ value, color = "#22d3ee" }: { value: number; color?: string }) {
   const radius = 28;
   const circumference = 2 * Math.PI * radius;
   const dashOffset = circumference - (value / 100) * circumference;
@@ -230,11 +251,11 @@ function ConfidenceRing({ value, color = "#6366f1" }: { value: number; color?: s
 
 function BoothPreview3D({ boothState, isGenerating }: { boothState: BoothTheme; isGenerating: boolean }) {
   const preset = PRESETS.find(p => p.id === boothState);
-  const accent = preset?.accent ?? "#6366f1";
+  const accent = preset?.accent ?? "#22d3ee";
 
   const colors = {
-    empty: { wall: "rgba(255,255,255,0.03)", led: "#6366f1", floor: "rgba(255,255,255,0.02)", glow: "rgba(99,102,241,0.15)" },
-    tech: { wall: "rgba(10,15,40,0.8)", led: "#6366f1", floor: "rgba(99,102,241,0.05)", glow: "rgba(99,102,241,0.25)" },
+    empty: { wall: "rgba(255,255,255,0.03)", led: "#22d3ee", floor: "rgba(255,255,255,0.02)", glow: "rgba(34,211,238,0.15)" },
+    tech: { wall: "rgba(10,15,40,0.8)", led: "#22d3ee", floor: "rgba(34,211,238,0.05)", glow: "rgba(34,211,238,0.25)" },
     luxury: { wall: "rgba(20,12,5,0.85)", led: "#f59e0b", floor: "rgba(245,158,11,0.06)", glow: "rgba(245,158,11,0.2)" },
     nature: { wall: "rgba(5,20,12,0.8)", led: "#10b981", floor: "rgba(16,185,129,0.06)", glow: "rgba(16,185,129,0.2)" },
     minimal: { wall: "rgba(15,15,20,0.9)", led: "#94a3b8", floor: "rgba(148,163,184,0.04)", glow: "rgba(148,163,184,0.15)" },
@@ -555,7 +576,7 @@ function ChatMessage({ msg, onChipClick }: { msg: AIMessage; onChipClick: (promp
     >
       {isAI && (
         <div className="w-8 h-8 rounded-full shrink-0 flex items-center justify-center shadow-[0_0_16px_rgba(99,102,241,0.5)]"
-          style={{ background: "linear-gradient(135deg, #6366f1, #a855f7)" }}>
+          style={{ background: "linear-gradient(135deg, #22d3ee, #14b8a6)" }}>
           <Sparkles className="w-3.5 h-3.5 text-white" />
         </div>
       )}
@@ -573,7 +594,7 @@ function ChatMessage({ msg, onChipClick }: { msg: AIMessage; onChipClick: (promp
             <ul className="mt-2.5 flex flex-col gap-1.5">
               {msg.bullets.map((b, i) => (
                 <li key={i} className="flex items-start gap-2">
-                  <span className="mt-[3px] shrink-0 w-1.5 h-1.5 rounded-full bg-indigo-400/60" />
+                  <span className="mt-[3px] shrink-0 w-1.5 h-1.5 rounded-full bg-cyan-400/60" />
                   <span className="text-white/75 text-[12px]">{b}</span>
                 </li>
               ))}
@@ -594,7 +615,7 @@ function ChatMessage({ msg, onChipClick }: { msg: AIMessage; onChipClick: (promp
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/10 text-[11px] font-medium text-white/70 hover:text-white transition-colors"
                 style={{ background: "rgba(255,255,255,0.04)" }}
               >
-                <ChevronRight className="w-3 h-3 text-indigo-400" />
+                <ChevronRight className="w-3 h-3 text-cyan-300" />
                 {chip.label}
               </motion.button>
             ))}
@@ -672,7 +693,7 @@ function AutoGeneratePanel({ onSelect, selected }: { onSelect: (p: BoothPreset) 
 
 // ─── Optimize Mode ────────────────────────────────────────────────────────────
 
-function OptimizePanel() {
+function OptimizePanel({ onApply }: { onApply: (prompt: string) => void }) {
   return (
     <div className="flex-1 overflow-y-auto p-5 flex flex-col gap-5 scrollbar-hide">
       <div className="flex items-center gap-2">
@@ -720,12 +741,14 @@ function OptimizePanel() {
           <span className="text-[11px] font-bold text-white/50 uppercase tracking-widest">AI Recommendations</span>
         </div>
         {OPTIMIZE_SUGGESTIONS.map((s, i) => (
-          <motion.div
+          <motion.button
             key={i}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 + i * 0.1 }}
-            className="flex items-start gap-3 p-3.5 rounded-2xl border border-white/8 bg-white/[0.02] hover:bg-white/5 transition-colors cursor-pointer"
+            type="button"
+            onClick={() => onApply(s.text)}
+            className="flex items-start gap-3 rounded-2xl border border-white/8 bg-white/[0.02] p-3.5 text-left transition-colors hover:bg-white/5"
           >
             <div className="shrink-0 mt-0.5">{s.icon}</div>
             <div className="flex-1">
@@ -733,7 +756,7 @@ function OptimizePanel() {
               <span className="text-[10px] font-bold text-emerald-400 mt-1 block">{s.impact}</span>
             </div>
             <ChevronRight className="w-3.5 h-3.5 text-white/25 shrink-0 mt-0.5" />
-          </motion.div>
+          </motion.button>
         ))}
       </div>
     </div>
@@ -744,7 +767,7 @@ function OptimizePanel() {
 
 export function AIGenerator() {
   const navigate = useNavigate();
-  const { openAR } = useOutletContext<{ openAR: () => void }>();
+  const { openAR, setShellConfig } = useOutletContext<RootOutletContext>();
 
   const [activeMode, setActiveMode] = useState<AppMode>("chat");
   const [messages, setMessages] = useState<AIMessage[]>(INITIAL_MESSAGES);
@@ -836,80 +859,168 @@ export function AIGenerator() {
   };
 
   const currentPreset = PRESETS.find(p => p.id === boothState);
+  const activeTemplateId = resolveBuilderTemplateId(boothState);
+  const arProject = useMemo(() => createProjectFromTemplate(activeTemplateId), [activeTemplateId]);
 
-  const MODES = [
+  const triggerArPreview = useCallback(() => {
+    openAR({
+      booth: {
+        ...arProject.booth,
+        name: currentPreset?.label ?? arProject.booth.name,
+        note:
+          currentPreset?.description ??
+          arProject.booth.note,
+      },
+      items: arProject.items,
+      sourceLabel: currentPreset?.label ?? arProject.booth.name,
+    });
+  }, [arProject, currentPreset, openAR]);
+
+  const MODES = useMemo(() => [
     { id: "chat" as AppMode, label: "Chat", icon: <Command className="w-3.5 h-3.5" /> },
     { id: "auto" as AppMode, label: "Auto Generate", icon: <Zap className="w-3.5 h-3.5" /> },
     { id: "optimize" as AppMode, label: "Optimize", icon: <TrendingUp className="w-3.5 h-3.5" /> },
-  ];
+  ], []);
 
-  return (
-    <div className="flex min-h-[100svh] w-full flex-col overflow-hidden text-white selection:bg-purple-500/30"
-      style={{ background: "radial-gradient(ellipse at 20% 50%, rgba(99,102,241,0.06) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(168,85,247,0.06) 0%, transparent 60%), #050508" }}>
-
-      {/* ── Ambient Orbs ── */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute top-[-200px] left-[-100px] w-[600px] h-[600px] rounded-full opacity-[0.04]"
-          style={{ background: "radial-gradient(circle, #6366f1, transparent)", filter: "blur(80px)" }} />
-        <div className="absolute bottom-[-200px] right-[-100px] w-[600px] h-[600px] rounded-full opacity-[0.04]"
-          style={{ background: "radial-gradient(circle, #a855f7, transparent)", filter: "blur(80px)" }} />
-      </div>
-
-      {/* ── Top Bar ── */}
-      <header className="relative z-50 mx-auto flex w-full max-w-[var(--content-max-width)] shrink-0 flex-col gap-3 px-[var(--page-gutter)] pt-4 pb-4 lg:flex-row lg:items-center lg:justify-between lg:pt-5">
-
-        {/* Back */}
-        <motion.button
-          whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
-          onClick={() => navigate("/")}
-          className="flex items-center gap-2 px-4 py-2 rounded-2xl border border-white/10 text-[12px] font-bold tracking-widest uppercase text-white/70 hover:text-white hover:bg-white/8 transition-all backdrop-blur-xl"
-          style={{ background: "rgba(255,255,255,0.03)" }}
-        >
-          <Home className="w-3.5 h-3.5" />
-          Dashboard
-        </motion.button>
-
-        {/* Mode Toggle */}
-        <div className="flex w-full flex-wrap items-center gap-1.5 rounded-2xl border border-white/10 p-1.5 backdrop-blur-3xl sm:w-auto"
-          style={{ background: "rgba(255,255,255,0.03)" }}>
-          {MODES.map(mode => (
+  const shellToolbar = useMemo(
+    () => (
+      <div className="flex min-w-0 flex-wrap items-center gap-2 lg:justify-end">
+        <div className="flex min-w-0 flex-wrap items-center gap-1.5 rounded-[1.2rem] border border-white/10 bg-white/[0.04] p-1.5">
+          {MODES.map((mode) => (
             <button
               key={mode.id}
+              type="button"
               onClick={() => setActiveMode(mode.id)}
-              className={`relative flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 text-[11px] font-bold uppercase tracking-wider transition-all duration-300 sm:flex-none sm:px-5 ${
-                activeMode === mode.id ? "text-white" : "text-white/35 hover:text-white/70 hover:bg-white/4"
+              className={`inline-flex min-h-11 items-center gap-2 rounded-[0.9rem] px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] transition ${
+                activeMode === mode.id
+                  ? "bg-cyan-400/16 text-cyan-100 ring-1 ring-cyan-300/35"
+                  : "text-slate-300 hover:bg-white/[0.06] hover:text-white"
               }`}
             >
-              {activeMode === mode.id && (
-                <motion.div
-                  layoutId="activeMode"
-                  className="absolute inset-0 rounded-xl"
-                  style={{ background: "rgba(255,255,255,0.09)" }}
-                  transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
-                />
-              )}
-              <span className="relative z-10 flex items-center gap-2">
-                {mode.icon}
-                {mode.label}
-              </span>
+              {mode.icon}
+              {mode.label}
             </button>
           ))}
         </div>
-
-        {/* AR Button */}
-        <motion.button
-          whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
-          onClick={openAR}
-          className="flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl border border-white/15 px-5 py-2 text-[12px] font-bold uppercase tracking-widest transition-all backdrop-blur-xl sm:w-auto"
-          style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.2), rgba(168,85,247,0.15))", color: "rgba(255,255,255,0.85)" }}
+        <button
+          type="button"
+          onClick={() => navigate(`/builder/${activeTemplateId}`)}
+          className="inline-flex min-h-11 items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white transition hover:bg-white/[0.08]"
         >
-          <Eye className="w-3.5 h-3.5" />
+          <Boxes className="h-4 w-4 text-cyan-300" />
+          Open in Builder
+        </button>
+        <button
+          type="button"
+          onClick={triggerArPreview}
+          className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-amber-400 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:brightness-105"
+        >
+          <Eye className="h-4 w-4" />
           View in AR
-        </motion.button>
-      </header>
+        </button>
+      </div>
+    ),
+    [MODES, activeMode, activeTemplateId, navigate, triggerArPreview],
+  );
+
+  const mobileQuickActions = useMemo(
+    () => (
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={() => setActiveMode("chat")}
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white"
+        >
+          <Sparkles className="h-4 w-4 text-cyan-300" />
+          Chat
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate(`/builder/${activeTemplateId}`)}
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white"
+        >
+          <Boxes className="h-4 w-4 text-cyan-300" />
+          Builder
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveMode("optimize")}
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white"
+        >
+          <TrendingUp className="h-4 w-4 text-emerald-300" />
+          Optimize
+        </button>
+        <button
+          type="button"
+          onClick={triggerArPreview}
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-amber-400 px-4 py-3 text-sm font-semibold text-slate-950"
+        >
+          <Eye className="h-4 w-4" />
+          AR
+        </button>
+      </div>
+    ),
+    [activeTemplateId, navigate, triggerArPreview],
+  );
+
+  useEffect(() => {
+    setShellConfig({
+      currentTemplateId: activeTemplateId,
+      currentTemplateName: currentPreset?.label ?? "AI Generator",
+      arPayload: {
+        booth: {
+          ...arProject.booth,
+          name: currentPreset?.label ?? arProject.booth.name,
+          note: currentPreset?.description ?? arProject.booth.note,
+        },
+        items: arProject.items,
+        sourceLabel: currentPreset?.label ?? arProject.booth.name,
+      },
+      contextMeta: (
+        <div className="flex min-w-0 flex-wrap items-center gap-3 rounded-[1.5rem] border border-white/10 bg-[linear-gradient(135deg,rgba(8,28,42,0.9),rgba(8,12,20,0.8))] px-4 py-3">
+          <span className="text-[0.68rem] font-semibold uppercase tracking-[0.28em] text-cyan-200/70">
+            AI Studio
+          </span>
+          <span className="truncate text-sm font-semibold text-white">
+            {currentPreset?.label ?? "Spatial concepting"}
+          </span>
+          <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-slate-300">
+            {activeMode}
+          </span>
+          <span className="rounded-full border border-amber-300/20 bg-amber-400/10 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-amber-100">
+            AR Ready
+          </span>
+        </div>
+      ),
+      toolbarContent: shellToolbar,
+      drawerContent: shellToolbar,
+      quickActions: mobileQuickActions,
+    });
+
+    return () => setShellConfig(null);
+  }, [activeMode, activeTemplateId, arProject, currentPreset, mobileQuickActions, setShellConfig, shellToolbar]);
+
+  return (
+    <div className="flex min-h-[100svh] w-full flex-col overflow-hidden text-white selection:bg-cyan-500/30"
+      style={{ background: "radial-gradient(ellipse at 20% 50%, rgba(34,211,238,0.08) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(45,212,191,0.08) 0%, transparent 60%), #05090f" }}>
+
+      {/* ── Ambient Orbs ── */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="absolute top-[-200px] left-[-100px] h-[600px] w-[600px] rounded-full opacity-[0.04]"
+          style={{ background: "radial-gradient(circle, #22d3ee, transparent)", filter: "blur(80px)" }} />
+        <div className="absolute bottom-[-200px] right-[-100px] h-[600px] w-[600px] rounded-full opacity-[0.04]"
+          style={{ background: "radial-gradient(circle, #14b8a6, transparent)", filter: "blur(80px)" }} />
+      </div>
 
       {/* ── Main Content ── */}
-      <main className="relative z-10 mx-auto flex w-full max-w-[var(--content-max-width)] flex-1 flex-col gap-4 overflow-auto px-[var(--page-gutter)] pb-4 min-h-0 sm:pb-6 lg:flex-row lg:gap-5 lg:overflow-hidden">
+      <main className="relative z-10 mx-auto flex w-full max-w-[var(--content-max-width)] flex-1 flex-col gap-4 overflow-auto px-[var(--page-gutter)] py-5 pb-28 min-h-0 sm:pb-32 lg:flex-row lg:gap-5 lg:overflow-hidden lg:pb-6">
+        <div className="w-full lg:hidden">
+          <PageHeader
+            eyebrow="AI Spatial Studio"
+            title="Generate booth concepts, pressure-test flow, and hand off the strongest layout to the builder."
+            description="Use guided chat, instant style presets, and optimization prompts to shape a trade show concept without losing the spatial context."
+          />
+        </div>
 
         {/* ── LEFT PANEL ── */}
         <motion.div
@@ -923,11 +1034,11 @@ export function AIGenerator() {
           {/* Panel Header */}
           <div className="px-6 py-4 border-b border-white/8 flex items-center justify-between shrink-0 relative">
             <div className="absolute top-0 left-0 right-0 h-16 pointer-events-none"
-              style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(99,102,241,0.12), transparent 70%)" }} />
+              style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(34,211,238,0.12), transparent 70%)" }} />
             <div className="flex items-center gap-3 relative z-10">
               <div className="relative">
                 <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
-                  style={{ background: "linear-gradient(135deg, #6366f1, #a855f7)", boxShadow: "0 0 20px rgba(99,102,241,0.4)" }}>
+                  style={{ background: "linear-gradient(135deg, #22d3ee, #14b8a6)", boxShadow: "0 0 20px rgba(34,211,238,0.3)" }}>
                   <Wand2 className="w-4 h-4 text-white" />
                 </div>
                 <motion.div
@@ -945,7 +1056,7 @@ export function AIGenerator() {
             </div>
             <div className="relative z-10 flex items-center gap-1.5">
               {[0, 0.3, 0.6].map((delay, i) => (
-                <motion.div key={i} className="w-1 h-1 rounded-full bg-indigo-400/60"
+                <motion.div key={i} className="w-1 h-1 rounded-full bg-cyan-400/60"
                   animate={{ scale: [1, 1.6, 1], opacity: [0.4, 1, 0.4] }}
                   transition={{ duration: 1.8, repeat: Infinity, delay }} />
               ))}
@@ -970,13 +1081,13 @@ export function AIGenerator() {
                     <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 border border-white/10"
                       style={{ background: "rgba(255,255,255,0.04)" }}>
                       <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}>
-                        <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                        <Sparkles className="w-3.5 h-3.5 text-cyan-300" />
                       </motion.div>
                     </div>
                     <div className="px-4 py-3.5 rounded-2xl rounded-tl-sm flex items-center gap-2 border border-white/10 backdrop-blur-xl"
                       style={{ background: "rgba(0,0,0,0.5)" }}>
                       {[0, 0.2, 0.4].map((delay, i) => (
-                        <motion.div key={i} className="w-1.5 h-1.5 rounded-full bg-indigo-400"
+                        <motion.div key={i} className="w-1.5 h-1.5 rounded-full bg-cyan-300"
                           animate={{ scale: [1, 1.6, 1], opacity: [0.4, 1, 0.4] }}
                           transition={{ duration: 1.2, repeat: Infinity, delay }} />
                       ))}
@@ -1005,7 +1116,7 @@ export function AIGenerator() {
                 transition={{ duration: 0.3 }}
                 className="flex-1 min-h-0 flex flex-col"
               >
-                <OptimizePanel />
+                <OptimizePanel onApply={handleSend} />
               </motion.div>
             )}
           </AnimatePresence>
@@ -1038,7 +1149,7 @@ export function AIGenerator() {
                 {/* Input Row */}
                 <div className="flex items-end gap-2.5">
                   {/* Textarea wrapper */}
-                  <div className="flex-1 flex items-end gap-2 px-3 py-2 rounded-[18px] border border-white/10 focus-within:border-indigo-500/50 transition-all"
+                  <div className="flex-1 flex items-end gap-2 rounded-[18px] border border-white/10 px-3 py-2 transition-all focus-within:border-cyan-400/45"
                     style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(20px)" }}>
 
                     {/* Voice */}
@@ -1079,8 +1190,8 @@ export function AIGenerator() {
                     disabled={!inputValue.trim() || isGenerating}
                     className="h-12 w-12 rounded-[16px] flex items-center justify-center shrink-0 relative overflow-hidden border border-white/20 disabled:opacity-40 disabled:cursor-not-allowed"
                     style={{
-                      background: "linear-gradient(135deg, #6366f1, #a855f7)",
-                      boxShadow: inputValue.trim() && !isGenerating ? "0 0 30px rgba(99,102,241,0.5)" : "none",
+                      background: "linear-gradient(135deg, #22d3ee, #14b8a6)",
+                      boxShadow: inputValue.trim() && !isGenerating ? "0 0 30px rgba(34,211,238,0.35)" : "none",
                     }}
                   >
                     <div className="absolute inset-0 bg-white/20 opacity-0 hover:opacity-100 transition-opacity" />
@@ -1124,11 +1235,11 @@ export function AIGenerator() {
             >
               <div
                 className="absolute top-1/4 left-1/3 w-[600px] h-[600px] rounded-full blur-[140px] opacity-25"
-                style={{ background: currentPreset ? `${currentPreset.accent}` : "#6366f1" }}
+                style={{ background: currentPreset ? `${currentPreset.accent}` : "#22d3ee" }}
               />
               <div
                 className="absolute bottom-1/3 right-1/4 w-[500px] h-[500px] rounded-full blur-[120px] opacity-15"
-                style={{ background: currentPreset ? `${currentPreset.accent}` : "#a855f7" }}
+                style={{ background: currentPreset ? `${currentPreset.accent}` : "#14b8a6" }}
               />
             </motion.div>
           </AnimatePresence>
@@ -1163,7 +1274,7 @@ export function AIGenerator() {
                   className="flex items-center gap-3 rounded-2xl border border-white/10 px-4 py-2.5 backdrop-blur-3xl"
                   style={{ background: "rgba(0,0,0,0.45)" }}
                 >
-                  <ConfidenceRing value={confidence} color={currentPreset?.accent ?? "#6366f1"} />
+                  <ConfidenceRing value={confidence} color={currentPreset?.accent ?? "#22d3ee"} />
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-white/35">AI Confidence</p>
                     <div className="mt-0.5 flex items-center gap-1.5">
@@ -1221,9 +1332,9 @@ export function AIGenerator() {
                     onChange={e => setStyleSlider(Number(e.target.value))}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
                   <div className="absolute left-0 top-0 bottom-0 rounded-full pointer-events-none"
-                    style={{ width: `${styleSlider}%`, background: "linear-gradient(90deg, #6366f1, #f59e0b)" }} />
+                    style={{ width: `${styleSlider}%`, background: "linear-gradient(90deg, #22d3ee, #f59e0b)" }} />
                   <div className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white pointer-events-none border-2"
-                    style={{ left: `calc(${styleSlider}% - 7px)`, borderColor: styleSlider > 50 ? "#f59e0b" : "#6366f1", boxShadow: "0 0 8px rgba(255,255,255,0.4)" }} />
+                    style={{ left: `calc(${styleSlider}% - 7px)`, borderColor: styleSlider > 50 ? "#f59e0b" : "#22d3ee", boxShadow: "0 0 8px rgba(255,255,255,0.4)" }} />
                 </div>
               </div>
 
@@ -1237,37 +1348,37 @@ export function AIGenerator() {
                     onChange={e => setDensitySlider(Number(e.target.value))}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
                   <div className="absolute left-0 top-0 bottom-0 rounded-full pointer-events-none"
-                    style={{ width: `${densitySlider}%`, background: "linear-gradient(90deg, #94a3b8, #a855f7)" }} />
+                    style={{ width: `${densitySlider}%`, background: "linear-gradient(90deg, #94a3b8, #14b8a6)" }} />
                   <div className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white pointer-events-none border-2"
-                    style={{ left: `calc(${densitySlider}% - 7px)`, borderColor: densitySlider > 50 ? "#a855f7" : "#94a3b8", boxShadow: "0 0 8px rgba(255,255,255,0.4)" }} />
+                    style={{ left: `calc(${densitySlider}% - 7px)`, borderColor: densitySlider > 50 ? "#14b8a6" : "#94a3b8", boxShadow: "0 0 8px rgba(255,255,255,0.4)" }} />
                 </div>
               </div>
             </div>
             <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:justify-end xl:justify-end">
               <motion.button
                 whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                onClick={() => navigate(`/builder/${boothState === "empty" ? "default" : boothState}`)}
+                onClick={() => navigate(`/builder/${activeTemplateId}`)}
                 className="relative group flex min-h-12 items-center justify-center gap-2.5 overflow-hidden rounded-[18px] border border-white/20 px-5 py-3 text-center transition-all"
                 style={{
-                  background: "linear-gradient(135deg, rgba(79,70,229,0.95), rgba(147,51,234,0.95))",
-                  boxShadow: "0 15px 50px rgba(99,102,241,0.4)",
+                  background: "linear-gradient(135deg, rgba(34,211,238,0.95), rgba(245,158,11,0.92))",
+                  boxShadow: "0 15px 50px rgba(34,211,238,0.24)",
                 }}
               >
                 <div className="absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"
-                  style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.3), rgba(168,85,247,0.3))" }} />
-                <span className="relative z-10 text-[12px] font-bold uppercase tracking-widest text-white">Apply to Builder</span>
+                  style={{ background: "linear-gradient(135deg, rgba(34,211,238,0.24), rgba(245,158,11,0.22))" }} />
+                <span className="relative z-10 text-[12px] font-bold uppercase tracking-widest text-slate-950">Apply to Builder</span>
                 <motion.div
                   animate={{ x: [0, 4, 0] }}
                   transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                   className="relative z-10"
                 >
-                  <ArrowRight className="w-4 h-4 text-white" />
+                  <ArrowRight className="w-4 h-4 text-slate-950" />
                 </motion.div>
               </motion.button>
 
               <motion.button
                 whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                onClick={openAR}
+                onClick={triggerArPreview}
                 className="flex min-h-12 items-center justify-center gap-2 rounded-[18px] border border-white/15 px-4 py-3 backdrop-blur-3xl transition-all hover:bg-white/8"
                 style={{ background: "rgba(255,255,255,0.05)" }}
               >

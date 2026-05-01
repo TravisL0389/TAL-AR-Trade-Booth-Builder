@@ -1,7 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
   Activity,
-  ArrowLeft,
   ChevronUp,
   Boxes,
   Copy,
@@ -28,8 +27,9 @@ import {
   type Dispatch,
   type SetStateAction,
 } from "react";
-import { Link, useNavigate, useOutletContext, useParams } from "react-router";
+import { useNavigate, useOutletContext, useParams } from "react-router";
 import { BoothCanvas } from "./BoothCanvas";
+import { PageHeader } from "./PageHeader";
 import type { RootOutletContext } from "./Root";
 import { SmartAssistant } from "./SmartAssistant";
 import {
@@ -93,11 +93,11 @@ const CATEGORY_META: Record<
   MenuCategory,
   { label: string; icon: LucideIcon; accent: string }
 > = {
-  all: { label: "All", icon: Boxes, accent: "#a78bfa" },
-  seating: { label: "Seating", icon: Plus, accent: "#c084fc" },
+  all: { label: "All", icon: Boxes, accent: "#22d3ee" },
+  seating: { label: "Seating", icon: Plus, accent: "#2dd4bf" },
   surfaces: { label: "Surfaces", icon: Grid3X3, accent: "#f59e0b" },
-  media: { label: "Media", icon: MonitorPlay, accent: "#60a5fa" },
-  branding: { label: "Branding", icon: Sparkles, accent: "#f472b6" },
+  media: { label: "Media", icon: MonitorPlay, accent: "#38bdf8" },
+  branding: { label: "Branding", icon: Sparkles, accent: "#fb7185" },
 };
 
 async function copyText(value: string) {
@@ -127,7 +127,7 @@ function CategoryChip({
       className={cn(
         "rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] transition",
         active
-          ? "bg-violet-500/20 text-violet-200"
+          ? "bg-cyan-400/16 text-cyan-100"
           : "bg-white/[0.05] text-white/55 hover:text-white",
       )}
     >
@@ -197,7 +197,7 @@ function TemplateCard({
       className={cn(
         "rounded-[22px] border p-4 text-left transition hover:-translate-y-0.5",
         activeTemplateId === templateId
-          ? "border-violet-400/35 bg-violet-500/14"
+          ? "border-cyan-300/35 bg-cyan-400/12"
           : "border-white/10 bg-white/[0.03]",
       )}
     >
@@ -247,7 +247,7 @@ function LibraryMenuContent({
           className="mt-4 flex w-full flex-wrap items-center justify-between gap-3 rounded-[20px] border border-white/10 bg-white/[0.04] px-4 py-3 text-left transition hover:bg-white/[0.07]"
         >
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-violet-500/16 text-violet-200">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-cyan-400/16 text-cyan-100">
               <Search className="h-4 w-4" />
             </div>
             <div>
@@ -285,7 +285,7 @@ function LibraryMenuContent({
               <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">Presets</p>
               <h3 className="mt-1 text-lg font-semibold text-white">Switch a full concept</h3>
             </div>
-            <Boxes className="h-5 w-5 text-violet-300" />
+            <Boxes className="h-5 w-5 text-cyan-300" />
           </div>
           <div className="mt-4 grid gap-3">
             {BUILDER_TEMPLATES.map((template) => (
@@ -351,7 +351,7 @@ function DesktopCommandRail({
               <button
                 type="button"
                 onClick={onOpenCommand}
-                className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05] text-violet-200 transition hover:bg-white/[0.08]"
+                className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.05] text-cyan-100 transition hover:bg-white/[0.08]"
               >
                 <Search className="h-4 w-4" />
               </button>
@@ -465,7 +465,7 @@ function InspectorPanel({
             onChange={(event) =>
               setBooth((current) => sanitizeBooth({ ...current, name: event.target.value }))
             }
-            className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-violet-300/40"
+            className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-300/40"
           />
         </label>
 
@@ -480,7 +480,7 @@ function InspectorPanel({
               onChange={(event) =>
                 setBooth((current) => sanitizeBooth({ ...current, width: Number(event.target.value) }))
               }
-              className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-violet-300/40"
+              className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-300/40"
             />
           </label>
           <label className="block">
@@ -493,7 +493,7 @@ function InspectorPanel({
               onChange={(event) =>
                 setBooth((current) => sanitizeBooth({ ...current, depth: Number(event.target.value) }))
               }
-              className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-violet-300/40"
+              className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-300/40"
             />
           </label>
         </div>
@@ -506,7 +506,7 @@ function InspectorPanel({
             onChange={(event) =>
               setBooth((current) => sanitizeBooth({ ...current, note: event.target.value }))
             }
-            className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-violet-300/40"
+            className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-300/40"
           />
         </label>
 
@@ -516,7 +516,7 @@ function InspectorPanel({
               <p className="text-[11px] uppercase tracking-[0.22em] text-white/45">Mobile AR link</p>
               <p className="mt-1 text-sm text-white/65">Open this exact layout on another device.</p>
             </div>
-            <MonitorPlay className="h-5 w-5 text-violet-300" />
+            <MonitorPlay className="h-5 w-5 text-cyan-300" />
           </div>
           <textarea
             rows={4}
@@ -547,7 +547,7 @@ function InspectorPanel({
                   : "Add Supabase keys to enable cloud project saves."}
               </p>
             </div>
-            <Save className="h-5 w-5 text-violet-300" />
+            <Save className="h-5 w-5 text-cyan-300" />
           </div>
           <div className="mt-4 flex flex-wrap gap-3">
             <button
@@ -610,7 +610,7 @@ function InspectorPanel({
                 {selectedItem ? selectedItem.label : "Nothing selected"}
               </p>
             </div>
-            <Activity className="h-5 w-5 text-violet-300" />
+            <Activity className="h-5 w-5 text-cyan-300" />
           </div>
 
           {selectedItem && selectedConfig && selectedFootprint && selectedId ? (
@@ -622,7 +622,7 @@ function InspectorPanel({
                 <input
                   value={selectedItem.label}
                   onChange={(event) => updateSelectedItem({ label: event.target.value })}
-                  className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-violet-300/40"
+                  className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-300/40"
                 />
               </label>
 
@@ -633,7 +633,7 @@ function InspectorPanel({
                     type="number"
                     value={selectedItem.x}
                     onChange={(event) => updateSelectedItem({ x: Number(event.target.value) })}
-                    className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-violet-300/40"
+                    className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-300/40"
                   />
                 </label>
                 <label className="block">
@@ -642,7 +642,7 @@ function InspectorPanel({
                     type="number"
                     value={selectedItem.y}
                     onChange={(event) => updateSelectedItem({ y: Number(event.target.value) })}
-                    className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-violet-300/40"
+                    className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-300/40"
                   />
                 </label>
               </div>
@@ -715,7 +715,7 @@ function InspectorPanel({
 export function Builder() {
   const { templateId = "default" } = useParams();
   const navigate = useNavigate();
-  const { openAR } = useOutletContext<RootOutletContext>();
+  const { openAR, setShellConfig } = useOutletContext<RootOutletContext>();
   const isMobile = useIsMobile();
   const hasHydratedRef = useRef(false);
   const shouldAutoOpenArRef = useRef(false);
@@ -752,6 +752,38 @@ export function Builder() {
     const baseUrl = `${window.location.origin}/builder/${booth.templateId || templateId}`;
     return buildShareUrl(baseUrl, serializeProject(booth, items));
   }, [booth, items, templateId]);
+  const triggerArPreview = useCallback(
+    (nextShareUrl = shareUrl) =>
+      openAR({
+        booth,
+        items,
+        shareUrl: nextShareUrl,
+        sourceLabel: booth.name,
+      }),
+    [booth, items, openAR, shareUrl],
+  );
+  const copyShareLink = useCallback(async () => {
+    const copied = await copyText(shareUrl);
+    setCopyLabel(copied ? "Copied" : "Clipboard unavailable");
+  }, [shareUrl]);
+  const shareLayout = useCallback(async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: booth.name,
+          text: "Open this trade show booth layout.",
+          url: shareUrl,
+        });
+        setCopyLabel("Shared");
+        return;
+      } catch (error) {
+        setCopyLabel("Share canceled");
+        return;
+      }
+    }
+
+    await copyShareLink();
+  }, [booth.name, copyShareLink, shareUrl]);
   const refreshCloudProjects = useCallback(async () => {
     if (!hasProjectCloudConfig) {
       setCloudProjects([]);
@@ -1055,144 +1087,183 @@ export function Builder() {
     [isMobile],
   );
 
+  const shellToolbar = useMemo(
+    () => (
+      <div className="flex flex-wrap justify-start gap-2 lg:justify-end">
+        <button
+          type="button"
+          onClick={() => setComponentMenuOpen((current) => !current)}
+          className={cn(
+            "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition",
+            componentMenuOpen
+              ? "border-cyan-300/30 bg-cyan-400/12 text-cyan-100"
+              : "border-white/10 bg-white/[0.04] text-slate-200 hover:bg-white/[0.08]",
+          )}
+        >
+          {componentMenuOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
+          Components
+        </button>
+        <button
+          type="button"
+          onClick={() => setCommandOpen(true)}
+          className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-white/[0.08]"
+        >
+          <Search className="h-4 w-4 text-cyan-300" />
+          Quick Add
+        </button>
+        <button
+          type="button"
+          onClick={() => setShowGrid((current) => !current)}
+          className={cn(
+            "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition",
+            showGrid
+              ? "border-cyan-300/30 bg-cyan-400/12 text-cyan-100"
+              : "border-white/10 bg-white/[0.04] text-slate-200 hover:bg-white/[0.08]",
+          )}
+        >
+          <Grid3X3 className="h-4 w-4" />
+          {showGrid ? "Grid On" : "Grid Off"}
+        </button>
+        <button
+          type="button"
+          onClick={() =>
+            setBooth((current) =>
+              sanitizeBooth({
+                ...current,
+                ambience: current.ambience === "day" ? "night" : "day",
+              }),
+            )
+          }
+          className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-white/[0.08]"
+        >
+          {booth.ambience === "day" ? <Sun className="h-4 w-4 text-amber-300" /> : <Moon className="h-4 w-4 text-cyan-300" />}
+          {booth.ambience === "day" ? "Day Scene" : "Night Scene"}
+        </button>
+        <button
+          type="button"
+          onClick={() => void shareLayout()}
+          className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-white/[0.08]"
+        >
+          <Copy className="h-4 w-4 text-teal-300" />
+          Share
+        </button>
+        <button
+          type="button"
+          onClick={() => triggerArPreview()}
+          className="inline-flex min-h-11 items-center gap-2 rounded-full border border-teal-300/25 bg-teal-400/12 px-4 py-2 text-sm font-semibold text-teal-100 transition hover:bg-teal-400/18"
+        >
+          <Eye className="h-4 w-4" />
+          Enter AR
+        </button>
+      </div>
+    ),
+    [booth.ambience, componentMenuOpen, setCommandOpen, setComponentMenuOpen, shareLayout, showGrid, triggerArPreview],
+  );
+
+  const mobileQuickActions = useMemo(
+    () => (
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={() => setComponentMenuOpen(true)}
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white"
+        >
+          <Boxes className="h-4 w-4 text-cyan-300" />
+          Add
+        </button>
+        <button
+          type="button"
+          onClick={() => setMobileInspectorOpen(true)}
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white"
+        >
+          <Activity className="h-4 w-4 text-amber-300" />
+          Inspector
+        </button>
+        <button
+          type="button"
+          onClick={() => void shareLayout()}
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white"
+        >
+          <Copy className="h-4 w-4 text-teal-300" />
+          Share
+        </button>
+        <button
+          type="button"
+          onClick={() => triggerArPreview()}
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-teal-400 px-4 py-3 text-sm font-semibold text-slate-950"
+        >
+          <Eye className="h-4 w-4" />
+          AR
+        </button>
+      </div>
+    ),
+    [shareLayout, triggerArPreview],
+  );
+
+  useEffect(() => {
+    setShellConfig({
+      currentTemplateId: booth.templateId || templateId,
+      currentTemplateName: booth.name,
+      arPayload: {
+        booth,
+        items,
+        shareUrl,
+        sourceLabel: booth.name,
+      },
+      contextMeta: (
+        <div className="flex min-w-0 flex-wrap items-center gap-3 rounded-[1.5rem] border border-white/10 bg-[linear-gradient(135deg,rgba(8,28,42,0.9),rgba(8,12,20,0.8))] px-4 py-3">
+          <span className="text-[0.68rem] font-semibold uppercase tracking-[0.28em] text-cyan-200/70">
+            Builder
+          </span>
+          <span className="truncate text-sm font-semibold text-white">{booth.name}</span>
+          <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-slate-300">
+            {booth.templateId}
+          </span>
+          <span className="rounded-full border border-emerald-300/20 bg-emerald-400/10 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-emerald-100">
+            Autosave Active
+          </span>
+        </div>
+      ),
+      toolbarContent: shellToolbar,
+      drawerContent: shellToolbar,
+      quickActions: mobileQuickActions,
+    });
+
+    return () => setShellConfig(null);
+  }, [booth, items, mobileQuickActions, setShellConfig, shellToolbar, shareUrl, templateId]);
+
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.2),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(236,72,153,0.12),transparent_22%),linear-gradient(180deg,#04050b_0%,#090910_100%)] text-white">
-      <header className="sticky top-0 z-30 border-b border-white/10 bg-black/30 backdrop-blur-2xl">
-      <div className="mx-auto flex w-full max-w-[var(--content-max-width)] flex-col gap-4 px-[var(--page-gutter)] py-4">
-          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-            <div className="flex min-w-0 flex-wrap items-center gap-3">
-              <Link
-                to="/"
-                className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/75 transition hover:bg-white/[0.08] hover:text-white"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back
-              </Link>
-              <div className="min-w-0 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2.5">
-                <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">Active project</p>
-                <div className="mt-1 flex flex-wrap items-center gap-3">
-                  <span className="min-w-0 text-base font-semibold">{booth.name}</span>
-                  <span className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-white/55">
-                    {booth.templateId}
-                  </span>
-                </div>
-              </div>
-              <div className="hidden rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2.5 md:block">
-                <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">Deployment status</p>
-                <div className="mt-1 flex items-center gap-2 text-sm font-medium text-emerald-300">
-                  <Save className="h-4 w-4" />
-                  Autosave active
-                </div>
-              </div>
-            </div>
-
-            <div className="grid gap-3 sm:flex sm:flex-wrap sm:items-center">
-              <button
-                type="button"
-                onClick={() => (isMobile ? setComponentMenuOpen(true) : setComponentMenuOpen((current) => !current))}
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/75 transition hover:bg-white/[0.08] hover:text-white"
-              >
-                {componentMenuOpen && !isMobile ? (
-                  <PanelLeftClose className="h-4 w-4" />
-                ) : (
-                  <PanelLeftOpen className="h-4 w-4" />
-                )}
-                Components
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setCommandOpen(true);
-                  if (!isMobile) {
-                    setComponentMenuOpen(true);
-                  }
-                }}
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/75 transition hover:bg-white/[0.08] hover:text-white"
-              >
-                <Search className="h-4 w-4" />
-                Quick Add
-                <span className="rounded-full border border-white/10 bg-black/25 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-white/45">
-                  Cmd/Ctrl K
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowGrid((current) => !current)}
-                className={cn(
-                  "inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border px-4 py-2 text-sm font-medium transition",
-                  showGrid
-                    ? "border-violet-400/30 bg-violet-500/14 text-violet-200"
-                    : "border-white/10 bg-white/[0.04] text-white/65 hover:text-white",
-                )}
-              >
-                <Grid3X3 className="h-4 w-4" />
-                Grid
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  setBooth((current) =>
-                    sanitizeBooth({
-                      ...current,
-                      ambience: current.ambience === "day" ? "night" : "day",
-                    }),
-                  )
-                }
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/75 transition hover:bg-white/[0.08] hover:text-white"
-              >
-                {booth.ambience === "day" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                {booth.ambience === "day" ? "Day Scene" : "Night Scene"}
-              </button>
-              <Link
-                to="/ai"
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/75 transition hover:bg-white/[0.08] hover:text-white"
-              >
-                <Sparkles className="h-4 w-4" />
-                AI Studio
-              </Link>
-              <button
-                type="button"
-                onClick={() =>
-                  openAR({
-                    booth,
-                    items,
-                    shareUrl,
-                    sourceLabel: booth.name,
-                  })
-                }
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-gradient-to-r from-violet-500 to-indigo-500 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_0_24px_rgba(99,102,241,0.35)] transition hover:brightness-110"
-              >
-                <Eye className="h-4 w-4" />
-                Enter AR
-              </button>
-            </div>
-          </div>
-
+    <div className="min-h-[100svh] bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.12),transparent_30%),radial-gradient(circle_at_88%_12%,rgba(45,212,191,0.12),transparent_24%),linear-gradient(180deg,#08131d_0%,#070b12_100%)] text-white">
+      <div className="mx-auto flex w-full max-w-[var(--content-max-width)] flex-col gap-4 px-[var(--page-gutter)] py-5 pb-28 xl:pb-5">
+        <PageHeader
+          eyebrow="Spatial Builder"
+          title="Place assets, tune the footprint, and stage the booth for AR review."
+          description="The builder keeps your components, canvas, and inspector in one coordinated workspace so layout decisions stay readable on every screen size."
+        >
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
-              <p className="text-[11px] uppercase tracking-[0.22em] text-white/45">Footprint</p>
-              <p className="mt-2 text-xl font-semibold">
+              <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400">Footprint</p>
+              <p className="mt-2 text-xl font-semibold text-white">
                 {booth.width} x {booth.depth}
-                <span className="ml-1 text-sm font-medium text-white/45">ft</span>
+                <span className="ml-1 text-sm font-medium text-slate-400">ft</span>
               </p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
-              <p className="text-[11px] uppercase tracking-[0.22em] text-white/45">Placed Items</p>
-              <p className="mt-2 text-xl font-semibold">{items.length}</p>
+              <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400">Placed Items</p>
+              <p className="mt-2 text-xl font-semibold text-white">{items.length}</p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
-              <p className="text-[11px] uppercase tracking-[0.22em] text-white/45">Occupancy</p>
-              <p className="mt-2 text-xl font-semibold">{metrics.occupancy}%</p>
+              <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400">Occupancy</p>
+              <p className="mt-2 text-xl font-semibold text-white">{metrics.occupancy}%</p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
-              <p className="text-[11px] uppercase tracking-[0.22em] text-white/45">Touchpoints</p>
-              <p className="mt-2 text-xl font-semibold">{metrics.touchpoints}</p>
+              <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400">Touchpoints</p>
+              <p className="mt-2 text-xl font-semibold text-white">{metrics.touchpoints}</p>
             </div>
           </div>
-        </div>
-      </header>
+        </PageHeader>
 
-      <div className="mx-auto grid w-full max-w-[var(--content-max-width)] gap-4 px-[var(--page-gutter)] py-4 pb-24 xl:grid-cols-[minmax(0,1fr),minmax(18rem,20rem)] xl:pb-4">
+        <div className="grid w-full gap-4 xl:grid-cols-[minmax(0,1fr),minmax(18rem,20rem)]">
         <div
           className={cn(
             "relative min-w-0 transition-[padding] duration-300",
@@ -1229,7 +1300,7 @@ export function Builder() {
             onClick={() => setMobileInspectorOpen(true)}
             className="absolute right-4 top-4 z-20 inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white shadow-[0_18px_40px_rgba(0,0,0,0.35)] backdrop-blur-2xl transition hover:bg-black/75 xl:hidden"
           >
-            <ChevronUp className="h-4 w-4 text-violet-200" />
+            <ChevronUp className="h-4 w-4 text-cyan-100" />
             Pull Tools
           </button>
         </div>
@@ -1413,6 +1484,7 @@ export function Builder() {
           })
         }
       />
+      </div>
     </div>
   );
 }

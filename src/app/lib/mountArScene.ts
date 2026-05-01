@@ -26,8 +26,8 @@ function buildBoothGroup(
   const grid = new THREE.GridHelper(
     Math.max(footprintWidth, footprintDepth),
     Math.max(booth.width, booth.depth),
-    0xa78bfa,
-    0x312e81,
+    0x22d3ee,
+    0x0f3b4a,
   );
   grid.position.y = 0.01;
   group.add(grid);
@@ -84,6 +84,9 @@ export async function mountArScene(
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.xr.enabled = true;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
   renderer.domElement.className = "fixed inset-0 z-[120] hidden h-full w-full";
   document.body.appendChild(renderer.domElement);
 
@@ -103,7 +106,7 @@ export async function mountArScene(
 
   const reticle = new THREE.Mesh(
     new THREE.RingGeometry(0.09, 0.12, 32).rotateX(-Math.PI / 2),
-    new THREE.MeshBasicMaterial({ color: 0xa78bfa }),
+    new THREE.MeshBasicMaterial({ color: 0x22d3ee }),
   );
   reticle.matrixAutoUpdate = false;
   reticle.visible = false;
@@ -128,11 +131,11 @@ export async function mountArScene(
 
   const arButton = ARButton.createButton(renderer, {
     requiredFeatures: ["hit-test"],
-    optionalFeatures: ["dom-overlay"],
-    domOverlay: { root: document.body },
+    optionalFeatures: ["dom-overlay", "light-estimation"],
+    domOverlay: { root: container },
   });
   arButton.className =
-    "inline-flex items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-r from-violet-500 to-indigo-500 px-5 py-3 text-sm font-semibold text-white shadow-lg transition hover:brightness-110";
+    "inline-flex min-h-11 items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-r from-cyan-500 to-teal-500 px-5 py-3 text-sm font-semibold text-slate-950 shadow-lg transition hover:brightness-110";
   arButton.textContent = "Start Live AR";
   container.appendChild(arButton);
 

@@ -56,6 +56,7 @@ export function ARPreview({ isOpen, onClose, templateId, project }: ARPreviewPro
   const [copyStatus, setCopyStatus] = useState("Copy mobile link");
   const [shareStatus, setShareStatus] = useState("Share");
   const [showArLauncher, setShowArLauncher] = useState(false);
+  const [launcherError, setLauncherError] = useState("");
   const [arSupport, setArSupport] = useState({
     checked: false,
     immersive: false,
@@ -67,6 +68,9 @@ export function ARPreview({ isOpen, onClose, templateId, project }: ARPreviewPro
     if (!isOpen) {
       setCameraActive(false);
       setShowArLauncher(false);
+      setLauncherError("");
+      setCopyStatus("Copy mobile link");
+      setShareStatus("Share");
     }
   }, [isOpen]);
 
@@ -174,7 +178,14 @@ export function ARPreview({ isOpen, onClose, templateId, project }: ARPreviewPro
     let cancelled = false;
 
     async function mountLauncher() {
-      launcherCleanupRef.current = await mountArScene(launcherRef.current!, booth, items);
+      try {
+        setLauncherError("");
+        launcherCleanupRef.current = await mountArScene(launcherRef.current!, booth, items);
+      } catch (error) {
+        setLauncherError(
+          "Live AR could not initialize on this device. Use the camera rehearsal or open the shared link on a supported mobile browser.",
+        );
+      }
 
       if (cancelled && launcherCleanupRef.current) {
         launcherCleanupRef.current();
@@ -236,7 +247,7 @@ export function ARPreview({ isOpen, onClose, templateId, project }: ARPreviewPro
                     <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">Readiness</p>
                     <h3 className="mt-1 text-xl font-semibold text-white">Device support</h3>
                   </div>
-                  <div className="rounded-full border border-white/10 bg-black/25 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-violet-200">
+                  <div className="rounded-full border border-white/10 bg-black/25 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-100">
                     {arSupport.immersive ? "Live AR ready" : "Fallback mode"}
                   </div>
                 </div>
@@ -263,7 +274,7 @@ export function ARPreview({ isOpen, onClose, templateId, project }: ARPreviewPro
                     <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">Mobile handoff</p>
                     <h3 className="mt-1 text-xl font-semibold text-white">Share this exact layout</h3>
                   </div>
-                  <Sparkles className="h-5 w-5 text-violet-300" />
+                  <Sparkles className="h-5 w-5 text-cyan-300" />
                 </div>
                 <textarea
                   readOnly
@@ -302,7 +313,7 @@ export function ARPreview({ isOpen, onClose, templateId, project }: ARPreviewPro
                         setShareStatus("Share canceled");
                       }
                     }}
-                    className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-violet-500/14 px-4 py-2 text-sm font-medium text-violet-200 transition hover:bg-violet-500/22"
+                    className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-cyan-400/12 px-4 py-2 text-sm font-medium text-cyan-100 transition hover:bg-cyan-400/18"
                   >
                     <Send className="h-4 w-4" />
                     {shareStatus}
@@ -316,7 +327,7 @@ export function ARPreview({ isOpen, onClose, templateId, project }: ARPreviewPro
                     <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">Camera fallback</p>
                     <h3 className="mt-1 text-xl font-semibold text-white">Rehearse the footprint in the room</h3>
                   </div>
-                  <Camera className="h-5 w-5 text-violet-300" />
+                  <Camera className="h-5 w-5 text-cyan-300" />
                 </div>
 
                 <div className="relative mt-4 overflow-hidden rounded-[24px] border border-white/10 bg-black/30">
@@ -330,14 +341,14 @@ export function ARPreview({ isOpen, onClose, templateId, project }: ARPreviewPro
                       />
                       <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-gradient-to-b from-transparent via-transparent to-black/35">
                         <div
-                          className="relative border border-violet-300/35 bg-violet-500/8 shadow-[0_35px_80px_rgba(0,0,0,0.3)]"
+                          className="relative border border-cyan-300/35 bg-cyan-400/8 shadow-[0_35px_80px_rgba(0,0,0,0.3)]"
                           style={{
                             width: booth.width * (CELL_SIZE * previewScale),
                             height: booth.depth * (CELL_SIZE * previewScale),
                             transform: "perspective(960px) rotateX(70deg)",
                             transformStyle: "preserve-3d",
                             backgroundImage:
-                              "linear-gradient(rgba(167,139,250,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(167,139,250,0.08) 1px, transparent 1px)",
+                              "linear-gradient(rgba(34,211,238,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,0.08) 1px, transparent 1px)",
                             backgroundSize: "14px 14px",
                           }}
                         >
@@ -400,11 +411,22 @@ export function ARPreview({ isOpen, onClose, templateId, project }: ARPreviewPro
                     <p className="text-[11px] uppercase tracking-[0.24em] text-white/45">Immersive placement</p>
                     <h3 className="mt-1 text-xl font-semibold text-white">Launch live WebXR</h3>
                   </div>
-                  <ScanSearch className="h-5 w-5 text-violet-300" />
+                  <ScanSearch className="h-5 w-5 text-cyan-300" />
                 </div>
                 <p className="mt-3 text-sm leading-6 text-white/55">
                   On supported mobile hardware, the launcher below opens a real immersive AR session with hit-testing and full-scale booth massing.
                 </p>
+                <div className="mt-4 grid gap-2 text-sm text-white/60 sm:grid-cols-3">
+                  <div className="rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5">
+                    1. Open over HTTPS or localhost
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5">
+                    2. Use a mobile browser with WebXR support
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-black/20 px-3 py-2.5">
+                    3. Grant camera access and scan the floor
+                  </div>
+                </div>
                 <div
                   ref={launcherRef}
                   className="mt-4 flex min-h-[13rem] items-center justify-center rounded-[24px] border border-dashed border-white/15 bg-black/20 p-6 sm:min-h-[15rem]"
@@ -414,13 +436,14 @@ export function ARPreview({ isOpen, onClose, templateId, project }: ARPreviewPro
                       type="button"
                       disabled={!arSupport.immersive}
                       onClick={() => setShowArLauncher(true)}
-                      className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-gradient-to-r from-violet-500 to-indigo-500 px-5 py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-45"
+                      className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-gradient-to-r from-cyan-500 to-teal-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-45"
                     >
                       <Sparkles className="h-4 w-4" />
                       Prepare live AR launcher
                     </button>
                   ) : null}
                 </div>
+                {launcherError ? <p className="mt-3 text-sm text-rose-300">{launcherError}</p> : null}
               </section>
             </div>
           </div>

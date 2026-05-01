@@ -130,7 +130,7 @@ export function BoothCanvas({
         </div>
         <div className="flex flex-wrap gap-2 text-[11px] font-medium text-white/55">
           <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1.5">Drag to move</span>
-          <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1.5">R to rotate</span>
+          <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1.5">Use inspector to rotate</span>
           <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1.5">
             {booth.width}ft x {booth.depth}ft
           </span>
@@ -161,7 +161,7 @@ export function BoothCanvas({
                     ? "linear-gradient(180deg, rgba(148, 163, 184, 0.22), rgba(15, 23, 42, 0.95))"
                     : "linear-gradient(180deg, rgba(30, 41, 59, 0.95), rgba(5, 5, 11, 0.95))",
                 backgroundImage: showGrid
-                  ? `linear-gradient(rgba(167,139,250,0.10) 1px, transparent 1px), linear-gradient(90deg, rgba(167,139,250,0.10) 1px, transparent 1px)`
+                  ? `linear-gradient(rgba(34,211,238,0.10) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,0.10) 1px, transparent 1px)`
                   : "none",
                 backgroundSize: `${CELL_SIZE}px ${CELL_SIZE}px`,
               }}
